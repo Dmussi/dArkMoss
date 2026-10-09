@@ -26,6 +26,7 @@ case "$UNIT" in
   miniloong) DMUPD_PLATFORM="Miniloong" ;;
   a10mini)   DMUPD_PLATFORM="A10Mini" ;;
   g350)      DMUPD_PLATFORM="G350" ;;
+  xumini)    DMUPD_PLATFORM="XUMiniM" ;;
   *)         DMUPD_PLATFORM="" ;;
 esac
 

@@ -154,6 +154,7 @@ case "$UNIT" in
   miniloong) HW_DEVICE_NAME="Miniloong Pocket 1" ;;
   a10mini)   HW_DEVICE_NAME="A10 Mini" ;;
   g350)      HW_DEVICE_NAME="G350" ;;
+  xumini)    HW_DEVICE_NAME="XU Mini M" ;;
   *)         HW_DEVICE_NAME="" ;;
 esac
 if [ -n "$HW_DEVICE_NAME" ] && ! grep -q '^HW_DEVICE=' Arkbuild/etc/os-release 2>/dev/null; then
@@ -168,6 +169,7 @@ case "$UNIT" in
   miniloong) SPRUCE_PLATFORM_NAME="Miniloong" ;;
   a10mini)   SPRUCE_PLATFORM_NAME="A10Mini" ;;
   g350)      SPRUCE_PLATFORM_NAME="G350" ;;
+  xumini)    SPRUCE_PLATFORM_NAME="XUMiniM" ;;
   *)         SPRUCE_PLATFORM_NAME="" ;;
 esac
 if [ -n "$SPRUCE_PLATFORM_NAME" ] && ! grep -q '^SPRUCE_PLATFORM=' Arkbuild/etc/os-release 2>/dev/null; then

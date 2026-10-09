@@ -2,3 +2,4 @@ rgb30
 miniloong
 a10mini
 g350
+xumini

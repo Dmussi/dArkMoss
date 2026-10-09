@@ -25,7 +25,8 @@ booti \${loadaddr} \${initrd_loadaddr} \${dtb_loadaddr}
 EOF
 
 if [ "$UNIT" == "xumini" ]; then
-  # Portrait panel: a 90-degree-rotated 480x640 logo, not the landscape one.
+  # Portrait panel: U-Boot copies the BMP as-is, so the landscape logo is turned
+  # 90 degrees clockwise (480x640), the same way as the kernel's fbcon=rotate:1.
   sudo cp logos/xumini/logo.bmp ${mountpoint}/logo.bmp
 else
   sudo cp logos/unrotated/dArkMoss.bmp ${mountpoint}/logo.bmp

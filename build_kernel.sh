@@ -15,11 +15,20 @@ if [ "$UNIT" == "rgb10" ] || [ "$UNIT" == "rk2020" ]; then
 else
   KERNEL_SRC="rg351"
   DEF_CONFIG="rg351p_tweaked_defconfig"
-  SCREEN_ROTATION="0"
+  if [ "$UNIT" == "xumini" ]; then
+    SCREEN_ROTATION="1"
+  else
+    SCREEN_ROTATION="0"
+  fi
   KERNEL_DTB="${CHIPSET}-${UNIT}-linux.dtb"
 fi
 if [ ! -d "$KERNEL_SRC" ]; then
   git clone --recursive --depth=1 https://github.com/christianhaitian/linux.git -b $KERNEL_SRC $KERNEL_SRC
+fi
+if [ "$UNIT" == "xumini" ] && [ ! -f "$KERNEL_SRC/arch/arm64/boot/dts/rockchip/rk3326-xumini-linux.dts" ]; then
+  # xu10-joypad and the Mini M board DTS are ours; christianhaitian/linux has no such unit.
+  git -C $KERNEL_SRC apply ../patches/xumini/kernel/0001-rk3326-xumini-linux.patch
+  git -C $KERNEL_SRC apply ../patches/xumini/kernel/0002-xu10-joypad.patch
 fi
 cd $KERNEL_SRC
 for patch in ../scripts/kernel-${KERNEL_SRC}/*.patch; do
@@ -31,6 +40,10 @@ for patch in ../scripts/kernel-${KERNEL_SRC}/*.patch; do
   fi
 done
 make ARCH=arm64 ${DEF_CONFIG}
+if [ "$UNIT" == "xumini" ]; then
+  ./scripts/config --module CONFIG_JOYSTICK_XU10
+  make ARCH=arm64 olddefconfig
+fi
 CFLAGS=-Wno-deprecated-declarations make -j$(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- modules_prepare
 CFLAGS=-Wno-deprecated-declarations make -j$(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image dtbs modules
 verify_action
@@ -60,7 +73,7 @@ if [ "$UNIT" == "g350" ]; then
     sudo cp /tmp/${UNIT}-uboot.dtb ${mountpoint}/${name}-uboot.dtb
   done
   sudo rm /tmp/${UNIT}-uboot.dtb
-elif [ "$UNIT" == "rg351mp" ] || [ "$UNIT" == "a10mini" ]; then
+elif [ "$UNIT" == "rg351mp" ] || [ "$UNIT" == "a10mini" ] || [ "$UNIT" == "xumini" ]; then
   sudo cp /tmp/${UNIT}-uboot.dtb ${mountpoint}/rg351mp-uboot.dtb
   sudo rm /tmp/${UNIT}-uboot.dtb
 elif [ "$UNIT" == "rgb10" ]; then

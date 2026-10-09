@@ -24,7 +24,12 @@ load mmc 1:1 \${dtb_loadaddr} ${KERNEL_DTB}
 booti \${loadaddr} \${initrd_loadaddr} \${dtb_loadaddr}
 EOF
 
-sudo cp logos/unrotated/dArkMoss.bmp ${mountpoint}/logo.bmp
+if [ "$UNIT" == "xumini" ]; then
+  # Portrait panel: a 90-degree-rotated 480x640 logo, not the landscape one.
+  sudo cp logos/xumini/logo.bmp ${mountpoint}/logo.bmp
+else
+  sudo cp logos/unrotated/dArkMoss.bmp ${mountpoint}/logo.bmp
+fi
 
 if [ -d "optional" ]; then
   if [ ! -z "$(find optional/ -mindepth 1 -maxdepth 1)" ]; then
@@ -259,7 +264,7 @@ fi
 sudo chroot Arkbuild/ bash -c "systemctl set-default multi-user.target"
 if [[ "$UNIT" == "rgb10" ]]; then
   sudo cp device/rgb10/* Arkbuild/usr/local/bin/
-elif [[ "$UNIT" == "rg351mp" ]] || [[ "$UNIT" == "g350" ]] || [[ "$UNIT" == "a10mini" ]]; then
+elif [[ "$UNIT" == "rg351mp" ]] || [[ "$UNIT" == "g350" ]] || [[ "$UNIT" == "a10mini" ]] || [[ "$UNIT" == "xumini" ]]; then
   sudo cp device/rg351mp/*.sh Arkbuild/usr/local/bin/
   sudo cp device/rg351mp/*.py Arkbuild/usr/local/bin/
   sudo cp device/rg351mp/*.green Arkbuild/usr/local/bin/

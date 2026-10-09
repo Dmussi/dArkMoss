@@ -515,8 +515,9 @@
 			3676 3701 3724 3753 3793 3843 3896
 			3950 4009 4068 4124 4178 4245 4330>;
 
-			design_capacity = <2300>;
-			design_qmax = <2300>;
+			/* 2600 mAh per UnofficialOS's simple-battery node. */
+			design_capacity = <2600>;
+			design_qmax = <2600>;
 			bat_res = <100>;
 			sleep_enter_current = <300>;
 			sleep_exit_current = <300>;

@@ -77,6 +77,12 @@ if [ "$UNIT" == "g350" ]; then
   sudo rm /tmp/${UNIT}-uboot.dtb
 elif [ "$UNIT" == "rg351mp" ] || [ "$UNIT" == "a10mini" ] || [ "$UNIT" == "xumini" ]; then
   sudo cp /tmp/${UNIT}-uboot.dtb ${mountpoint}/rg351mp-uboot.dtb
+  # U-Boot's hwrev ADC table has no Mini M band (it reads 1000-1050): it asks
+  # for rg351p-uboot.dtb as "unknown", or rg351v's if a unit reads 494-534.
+  if [ "$UNIT" == "xumini" ]; then
+    sudo cp /tmp/${UNIT}-uboot.dtb ${mountpoint}/rg351p-uboot.dtb
+    sudo cp /tmp/${UNIT}-uboot.dtb ${mountpoint}/rg351v-uboot.dtb
+  fi
   sudo rm /tmp/${UNIT}-uboot.dtb
 elif [ "$UNIT" == "rgb10" ]; then
   sudo cp $KERNEL_SRC/arch/arm64/boot/dts/rockchip/${KERNEL_DTB_ALT} ${mountpoint}/rk3326-odroidgo2-linux-v11.dtb.oga11

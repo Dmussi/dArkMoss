@@ -1,3 +1,22 @@
+From f07bf9822445320c1bd62937e1c24890a0652e94 Mon Sep 17 00:00:00 2001
+From: arkun <56165886+CatalyticArkun@users.noreply.github.com>
+Date: Fri, 9 Oct 2026 10:17:48 -0500
+Subject: [PATCH 2/3] Input: add xu10-joypad driver
+
+Re-rolled from Knulli's linux_patches/0022-xu10-joypad.patch: fixed
+the Kconfig/Makefile hunks (the original touched a nonexistent
+Konfig file and the wrong Kconfig symbol), and marked the four
+__setup()-registered parsers __maybe_unused. Confirmed byte-for-byte
+identical driver logic to UnofficialOS's mainline backport of the
+same code (drivers/input/joystick/xu10-joypad.c, RK3326-CLONE
+004-input-drivers.patch).
+---
+ drivers/input/joystick/Kconfig       |    7 +
+ drivers/input/joystick/Makefile      |    1 +
+ drivers/input/joystick/xu10-joypad.c | 1140 ++++++++++++++++++++++++++
+ 3 files changed, 1148 insertions(+)
+ create mode 100644 drivers/input/joystick/xu10-joypad.c
+
 diff --git a/drivers/input/joystick/Kconfig b/drivers/input/joystick/Kconfig
 index ecb2bfdad..5db19fe26 100644
 --- a/drivers/input/joystick/Kconfig
@@ -1170,3 +1189,6 @@ index 000000000..f109bcf04
 +
 +/*----------------------------------------------------------------------------*/
 +
+-- 
+2.54.0 (Apple Git-157)
+

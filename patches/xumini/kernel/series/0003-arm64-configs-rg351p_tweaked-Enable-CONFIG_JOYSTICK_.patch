@@ -1,0 +1,27 @@
+From 394e172b132ff3501f8a6af8d6d790710445a0ca Mon Sep 17 00:00:00 2001
+From: arkun <56165886+CatalyticArkun@users.noreply.github.com>
+Date: Fri, 9 Oct 2026 10:18:05 -0500
+Subject: [PATCH 3/3] arm64: configs: rg351p_tweaked: Enable
+ CONFIG_JOYSTICK_XU10
+
+Built-in, matching the other board joypad drivers in this
+defconfig (ODROIDGO2/ODROIDGO3 are =y, not module).
+---
+ arch/arm64/configs/rg351p_tweaked_defconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/configs/rg351p_tweaked_defconfig b/arch/arm64/configs/rg351p_tweaked_defconfig
+index 951adbb07..f29d412c6 100644
+--- a/arch/arm64/configs/rg351p_tweaked_defconfig
++++ b/arch/arm64/configs/rg351p_tweaked_defconfig
+@@ -1870,6 +1870,7 @@ CONFIG_JOYSTICK_XPAD_LEDS=y
+ # CONFIG_JOYSTICK_ADC is not set
+ CONFIG_JOYSTICK_ODROIDGO2=y
+ CONFIG_JOYSTICK_ODROIDGO3=y
++CONFIG_JOYSTICK_XU10=y
+ # CONFIG_INPUT_TABLET is not set
+ # CONFIG_INPUT_TOUCHSCREEN is not set
+ # CONFIG_ROCKCHIP_REMOTECTL is not set
+-- 
+2.54.0 (Apple Git-157)
+

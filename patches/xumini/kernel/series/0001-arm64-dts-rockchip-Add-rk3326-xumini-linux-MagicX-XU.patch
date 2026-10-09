@@ -1,24 +1,37 @@
+From 8008167a6b7546ecc76ed1f13d57a7f9d24edc58 Mon Sep 17 00:00:00 2001
+From: arkun <56165886+CatalyticArkun@users.noreply.github.com>
+Date: Fri, 9 Oct 2026 10:17:32 -0500
+Subject: [PATCH 1/3] arm64: dts: rockchip: Add rk3326-xumini-linux (MagicX XU
+ Mini M)
+
+Relabeled RG351V with the Mini M's panel, xu10-joypad, keys, LEDs,
+battery and OPP overrides. Button GPIOs, stick invert and battery
+capacity follow UnofficialOS's Mini-M-specific corrections over the
+generic XU10 defaults; the rest is Knulli's shipped DTB.
+---
+ arch/arm64/boot/dts/rockchip/Makefile         |   1 +
+ .../boot/dts/rockchip/rk3326-xumini-linux.dts | 352 ++++++++++++++++++
+ 2 files changed, 353 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/rockchip/rk3326-xumini-linux.dts
+
 diff --git a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchip/Makefile
-index 04f40994b..bd87e247f 100644
+index 04f40994b..513f75c4a 100644
 --- a/arch/arm64/boot/dts/rockchip/Makefile
 +++ b/arch/arm64/boot/dts/rockchip/Makefile
-@@ -139,6 +139,10 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-rg351mp-notimingchange-linux.dtb
+@@ -139,6 +139,7 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-rg351mp-notimingchange-linux.dtb
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-r35s-linux.dtb
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-g350-linux.dtb
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-a10mini-linux.dtb
-+dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-xumini-linux.dtb
-+dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-xumini-linux.dtb
-+dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-xumini-linux.dtb
 +dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-xumini-linux.dtb
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-a10mini-60hz-linux.dtb
  dtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-a10mini-v4-linux.dtb
  
 diff --git a/arch/arm64/boot/dts/rockchip/rk3326-xumini-linux.dts b/arch/arm64/boot/dts/rockchip/rk3326-xumini-linux.dts
 new file mode 100644
-index 000000000..68eab2eae
+index 000000000..d06d01fab
 --- /dev/null
 +++ b/arch/arm64/boot/dts/rockchip/rk3326-xumini-linux.dts
-@@ -0,0 +1,342 @@
+@@ -0,0 +1,352 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * MagicX XU Mini M, relabeled RG351V (rockchip,rk3326-rg351v-linux).
@@ -74,32 +87,39 @@ index 000000000..68eab2eae
 +		button-adc-deadzone = <180>;
 +		button-adc-fuzz = <32>;
 +		button-adc-flat = <32>;
-+		abs_x-p-tuning = <5657>;
-+		abs_x-n-tuning = <5657>;
-+		abs_y-p-tuning = <5657>;
-+		abs_y-n-tuning = <5657>;
-+		abs_rx-p-tuning = <5657>;
-+		abs_rx-n-tuning = <5657>;
-+		abs_ry-p-tuning = <5657>;
-+		abs_ry-n-tuning = <5657>;
++		/* UnofficialOS's generic XU10 default (ADC_TUNING_DEFAULT=180); Knulli's
++		   DTB value of 5657 is out of the driver's sane range and unused there. */
++		abs_x-p-tuning = <200>;
++		abs_x-n-tuning = <200>;
++		abs_y-p-tuning = <200>;
++		abs_y-n-tuning = <200>;
++		abs_rx-p-tuning = <200>;
++		abs_rx-n-tuning = <200>;
++		abs_ry-p-tuning = <200>;
++		abs_ry-n-tuning = <200>;
 +		poll-interval = <10>;
 +		btn-lr-to-absx;
 +		btn-ud-to-absy;
-+		invert-absx;
++		/* Mini-M-specific per UnofficialOS's 011-magicx-xu-mini-m.patch:
++		   invert-absrx replaces the generic XU10's invert-absx. */
 +		invert-absy;
++		invert-absrx;
 +
 +		sw1 { gpios = <&gpio1 RK_PB4 GPIO_ACTIVE_LOW>; label = "GPIO DPAD-UP"; linux,code = <544>; };
 +		sw2 { gpios = <&gpio1 RK_PB5 GPIO_ACTIVE_LOW>; label = "GPIO DPAD-DOWN"; linux,code = <545>; };
 +		sw3 { gpios = <&gpio1 RK_PB6 GPIO_ACTIVE_LOW>; label = "GPIO DPAD-LEFT"; linux,code = <546>; };
 +		sw4 { gpios = <&gpio1 RK_PB7 GPIO_ACTIVE_LOW>; label = "GPIO DPAD-RIGHT"; linux,code = <547>; };
-+		sw5 { gpios = <&gpio2 RK_PA2 GPIO_ACTIVE_LOW>; label = "GPIO KEY BTN-A"; linux,code = <304>; };
-+		sw6 { gpios = <&gpio2 RK_PA3 GPIO_ACTIVE_LOW>; label = "GPIO BTN-B"; linux,code = <305>; };
-+		sw7 { gpios = <&gpio2 RK_PA1 GPIO_ACTIVE_LOW>; label = "GPIO BTN-Y"; linux,code = <308>; };
++		/* sw5-sw8, sw11-sw12 gpios: Mini-M-specific per UnofficialOS's 011
++		   patch, which rewires A/B/Y and L2/R2 relative to the generic XU10
++		   (and Knulli's DTB, which kept the generic wiring unchanged). */
++		sw5 { gpios = <&gpio2 RK_PA3 GPIO_ACTIVE_LOW>; label = "GPIO KEY BTN-A"; linux,code = <304>; };
++		sw6 { gpios = <&gpio2 RK_PA1 GPIO_ACTIVE_LOW>; label = "GPIO BTN-B"; linux,code = <305>; };
++		sw7 { gpios = <&gpio2 RK_PA2 GPIO_ACTIVE_LOW>; label = "GPIO BTN-Y"; linux,code = <308>; };
 +		sw8 { gpios = <&gpio2 RK_PA0 GPIO_ACTIVE_LOW>; label = "GPIO BTN-X"; linux,code = <307>; };
 +		sw9 { gpios = <&gpio2 RK_PA6 GPIO_ACTIVE_LOW>; label = "GPIO TOP-LEFT"; linux,code = <310>; };
 +		sw10 { gpios = <&gpio2 RK_PA7 GPIO_ACTIVE_LOW>; label = "GPIO TOP-RIGHT"; linux,code = <311>; };
-+		sw11 { gpios = <&gpio3 RK_PB2 GPIO_ACTIVE_LOW>; label = "GPIO TOP-RIGHT2"; linux,code = <313>; };
-+		sw12 { gpios = <&gpio3 RK_PB4 GPIO_ACTIVE_LOW>; label = "GPIO TOP-LEFT2"; linux,code = <312>; };
++		sw11 { gpios = <&gpio3 RK_PB4 GPIO_ACTIVE_LOW>; label = "GPIO TOP-RIGHT2"; linux,code = <313>; };
++		sw12 { gpios = <&gpio3 RK_PB2 GPIO_ACTIVE_LOW>; label = "GPIO TOP-LEFT2"; linux,code = <312>; };
 +		sw13 { gpios = <&gpio2 RK_PB0 GPIO_ACTIVE_LOW>; label = "GPIO BTN-SELECT"; linux,code = <314>; };
 +		sw14 { gpios = <&gpio2 RK_PA5 GPIO_ACTIVE_LOW>; label = "GPIO BTN-START"; linux,code = <315>; };
 +		sw15 { gpios = <&gpio2 RK_PB1 GPIO_ACTIVE_LOW>; label = "GPIO BTN-THUMBL"; linux,code = <317>; };
@@ -303,8 +323,10 @@ index 000000000..68eab2eae
 +		ocv_table = <3158 3434 3495 3546 3584 3617 3647
 +			3676 3701 3724 3753 3793 3843 3896
 +			3950 4009 4068 4124 4178 4245 4330>;
-+		design_capacity = <2300>;
-+		design_qmax = <2300>;
++		/* UnofficialOS's simple-battery node gives 2600 mAh; Knulli's
++		   DTB has 2300. Capacity only; the OCV table stays Knulli's. */
++		design_capacity = <2600>;
++		design_qmax = <2600>;
 +	};
 +
 +	charger {
@@ -314,8 +336,9 @@ index 000000000..68eab2eae
 +
 +&pinctrl {
 +	headphone {
++		/* pull_down per UnofficialOS's Mini-M override (Knulli: pull_up). */
 +		hp_det: hp-det {
-+			rockchip,pins = <2 RK_PC6 RK_FUNC_GPIO &pcfg_pull_up>;
++			rockchip,pins = <2 RK_PC6 RK_FUNC_GPIO &pcfg_pull_down>;
 +		};
 +	};
 +
@@ -361,3 +384,6 @@ index 000000000..68eab2eae
 +		};
 +	};
 +};
+-- 
+2.54.0 (Apple Git-157)
+

@@ -26,9 +26,12 @@ if [ ! -d "$KERNEL_SRC" ]; then
   git clone --recursive --depth=1 https://github.com/christianhaitian/linux.git -b $KERNEL_SRC $KERNEL_SRC
 fi
 if [ "$UNIT" == "xumini" ] && [ ! -f "$KERNEL_SRC/arch/arm64/boot/dts/rockchip/rk3326-xumini-linux.dts" ]; then
-  # xu10-joypad and the Mini M board DTS are ours; christianhaitian/linux has no such unit.
-  git -C $KERNEL_SRC apply ../patches/xumini/kernel/0001-rk3326-xumini-linux.patch
-  git -C $KERNEL_SRC apply ../patches/xumini/kernel/0002-xu10-joypad.patch
+  # Temporary: christianhaitian/linux's rg351 has no xumini unit of its own
+  # yet. This is a plain 3-patch series (DTS, xu10-joypad driver, defconfig
+  # line) meant to git-am cleanly onto rg351 as-is; drop this whole block
+  # for a one-line change if rg351 ever carries the board itself.
+  git -C $KERNEL_SRC -c user.name=dArkMoss -c user.email=dArkMoss@localhost \
+    am ../patches/xumini/kernel/series/*.patch
 fi
 cd $KERNEL_SRC
 for patch in ../scripts/kernel-${KERNEL_SRC}/*.patch; do
@@ -40,10 +43,6 @@ for patch in ../scripts/kernel-${KERNEL_SRC}/*.patch; do
   fi
 done
 make ARCH=arm64 ${DEF_CONFIG}
-if [ "$UNIT" == "xumini" ]; then
-  ./scripts/config --module CONFIG_JOYSTICK_XU10
-  make ARCH=arm64 olddefconfig
-fi
 CFLAGS=-Wno-deprecated-declarations make -j$(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- modules_prepare
 CFLAGS=-Wno-deprecated-declarations make -j$(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image dtbs modules
 verify_action

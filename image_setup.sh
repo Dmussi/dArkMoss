@@ -25,6 +25,8 @@ cd u-boot-${CHIPSET}
 if [ "$UNIT" == "xumini" ]; then
   # xumini-uboot.dts is ours; RG351MP-u-boot has no such unit upstream.
   patch -p1 < ../patches/xumini/uboot/0001-arch-arm-dts-Makefile.patch
+  # hwrev learns the Mini M's ADC band, so it asks for xumini-uboot.dtb by name.
+  patch -p1 < ../patches/xumini/uboot/0002-hwrev-xumini.patch
   cp ../patches/xumini/uboot/xumini-uboot.dts arch/arm/dts/
 fi
 ./make.sh odroidgoa

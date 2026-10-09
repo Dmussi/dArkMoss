@@ -1,0 +1,15 @@
+--- a/cmd/hwrev.c	2026-10-09 13:55:02
++++ b/cmd/hwrev.c	2026-10-09 13:55:02
+@@ -36,6 +36,12 @@
+ 		env_set("dtb_uboot", "rg351p-uboot.dtb");
+ 		env_set("dtb_kernel", "rk3326-rg351p-linux.dtb");
+ 	}
++	/* MagicX XU Mini M: the band UnofficialOS's hwrev patch uses */
++	else if (check_range(1000, 1050, hwrev_adc)) {
++		env_set("hwrev", "xumini");
++		env_set("dtb_uboot", "xumini-uboot.dtb");
++		env_set("dtb_kernel", "rk3326-xumini-linux.dtb");
++	}
+ 	/* Unknown */
+ 	else {
+ 		env_set("hwrev", "v00");

@@ -3,8 +3,8 @@
  *
  * SPDX-License-Identifier:     GPL-2.0+
  *
- * MagicX XU Mini M: rg351v-uboot.dts with the Mini M panel timing/init and
- * its GPIO-switched panel rail (vcc18_lcd_n), for the boot logo and charge
+ * MagicX XU Mini M: rg351v-uboot.dts with the Mini M panel, its GPIO-switched
+ * panel rail (vcc18_lcd_n) and its PMIC rails, for the boot logo and charge
  * screen only. Button/LED/battery nodes are unused by U-Boot and left as-is.
  */
 
@@ -413,25 +413,29 @@
 				};
 			};
 
+			/* Mini M rails follow Knulli's stock-derived DTB and ROCKNIX's xu10:
+			 * 3.0 V IO, LDO1 and LDO8 always on (LDO8 = IO bank 3). Label kept. */
 			vcc_3v3: DCDC_REG4 {
 				regulator-always-on;
 				regulator-boot-on;
-				regulator-min-microvolt = <3300000>;
-				regulator-max-microvolt = <3300000>;
+				regulator-min-microvolt = <3000000>;
+				regulator-max-microvolt = <3000000>;
 				regulator-initial-mode = <0x2>;
-				regulator-name = "vcc_3v3";
+				regulator-name = "vcc_3v0";
 				regulator-state-mem {
 					regulator-off-in-suspend;
-					regulator-suspend-microvolt = <3300000>;
+					regulator-suspend-microvolt = <3000000>;
 				};
 			};
 
 			vcc_1v0: LDO_REG1 {
+				regulator-always-on;
+				regulator-boot-on;
 				regulator-min-microvolt = <1000000>;
 				regulator-max-microvolt = <1000000>;
 				regulator-name = "vcc_1v0";
 				regulator-state-mem {
-					regulator-off-in-suspend;
+					regulator-on-in-suspend;
 					regulator-suspend-microvolt = <1000000>;
 				};
 			};
@@ -463,12 +467,12 @@
 			vcc3v3_pmu: LDO_REG4 {
 				regulator-always-on;
 				regulator-boot-on;
-				regulator-min-microvolt = <3300000>;
-				regulator-max-microvolt = <3300000>;
-				regulator-name = "vcc3v3_pmu";
+				regulator-min-microvolt = <3000000>;
+				regulator-max-microvolt = <3000000>;
+				regulator-name = "vcc3v0_pmu";
 				regulator-state-mem {
 					regulator-on-in-suspend;
-					regulator-suspend-microvolt = <3300000>;
+					regulator-suspend-microvolt = <3000000>;
 				};
 			};
 
@@ -492,6 +496,38 @@
 				regulator-state-mem {
 					regulator-on-in-suspend;
 					regulator-suspend-microvolt = <3300000>;
+				};
+			};
+
+			vcc2v8_dvp: LDO_REG7 {
+				regulator-min-microvolt = <2800000>;
+				regulator-max-microvolt = <2800000>;
+				regulator-name = "vcc2v8_dvp";
+				regulator-state-mem {
+					regulator-off-in-suspend;
+					regulator-suspend-microvolt = <2800000>;
+				};
+			};
+
+			vcc3v0_dvp: LDO_REG8 {
+				regulator-always-on;
+				regulator-boot-on;
+				regulator-min-microvolt = <3000000>;
+				regulator-max-microvolt = <3000000>;
+				regulator-name = "vcc3v0_dvp";
+				regulator-state-mem {
+					regulator-on-in-suspend;
+					regulator-suspend-microvolt = <3000000>;
+				};
+			};
+
+			vdd1v5_dvp: LDO_REG9 {
+				regulator-min-microvolt = <1500000>;
+				regulator-max-microvolt = <1500000>;
+				regulator-name = "vdd1v5_dvp";
+				regulator-state-mem {
+					regulator-off-in-suspend;
+					regulator-suspend-microvolt = <1500000>;
 				};
 			};
 
@@ -578,9 +614,9 @@
 &io_domains {
 	status = "okay";
 
-	vccio1-supply = <&vccio_sd>;
+	vccio1-supply = <&vcc1v8_soc>;
 	vccio2-supply = <&vccio_sd>;
-	vccio3-supply = <&vcc_3v3>;
+	vccio3-supply = <&vcc3v0_dvp>;
 	vccio4-supply = <&vcc_3v3>;
 	vccio5-supply = <&vcc_3v3>;
 	vccio6-supply = <&vcc_3v3>;

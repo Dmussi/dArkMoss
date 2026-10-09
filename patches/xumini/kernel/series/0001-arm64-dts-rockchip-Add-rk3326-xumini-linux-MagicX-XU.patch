@@ -1,17 +1,17 @@
-From 8008167a6b7546ecc76ed1f13d57a7f9d24edc58 Mon Sep 17 00:00:00 2001
+From eb78d3b07978f228a5fb6f1fef50c4290ff947c2 Mon Sep 17 00:00:00 2001
 From: arkun <56165886+CatalyticArkun@users.noreply.github.com>
-Date: Fri, 9 Oct 2026 10:17:32 -0500
+Date: Fri, 9 Oct 2026 14:23:56 -0500
 Subject: [PATCH 1/3] arm64: dts: rockchip: Add rk3326-xumini-linux (MagicX XU
  Mini M)
 
-Relabeled RG351V with the Mini M's panel, xu10-joypad, keys, LEDs,
+Relabeled RG351V with the Mini M's panel, PMIC rails, xu10-joypad, keys, LEDs,
 battery and OPP overrides. Button GPIOs, stick invert and battery
 capacity follow UnofficialOS's Mini-M-specific corrections over the
 generic XU10 defaults; the rest is Knulli's shipped DTB.
 ---
  arch/arm64/boot/dts/rockchip/Makefile         |   1 +
- .../boot/dts/rockchip/rk3326-xumini-linux.dts | 352 ++++++++++++++++++
- 2 files changed, 353 insertions(+)
+ .../boot/dts/rockchip/rk3326-xumini-linux.dts | 424 ++++++++++++++++++
+ 2 files changed, 425 insertions(+)
  create mode 100644 arch/arm64/boot/dts/rockchip/rk3326-xumini-linux.dts
 
 diff --git a/arch/arm64/boot/dts/rockchip/Makefile b/arch/arm64/boot/dts/rockchip/Makefile
@@ -28,10 +28,10 @@ index 04f40994b..513f75c4a 100644
  
 diff --git a/arch/arm64/boot/dts/rockchip/rk3326-xumini-linux.dts b/arch/arm64/boot/dts/rockchip/rk3326-xumini-linux.dts
 new file mode 100644
-index 000000000..d06d01fab
+index 000000000..608a36797
 --- /dev/null
 +++ b/arch/arm64/boot/dts/rockchip/rk3326-xumini-linux.dts
-@@ -0,0 +1,352 @@
+@@ -0,0 +1,424 @@
 +// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
 +/*
 + * MagicX XU Mini M, relabeled RG351V (rockchip,rk3326-rg351v-linux).
@@ -191,6 +191,78 @@ index 000000000..d06d01fab
 +		opp-microvolt-L3 = <1225000 1225000 1350000>;
 +		clock-latency-ns = <40000>;
 +	};
++};
++
++/* Mini M rails per Knulli's stock-derived DTB and ROCKNIX's xu10: 3.0 V IO,
++ * LDO8 always on (IO bank 3 = face buttons, stick mux), LDO9 unused. */
++&vcc_3v3 {
++	regulator-min-microvolt = <3000000>;
++	regulator-max-microvolt = <3000000>;
++	regulator-name = "vcc_3v0";
++	regulator-state-mem {
++		regulator-suspend-microvolt = <3000000>;
++	};
++};
++
++&vcc_1v0 {
++	regulator-always-on;
++	regulator-boot-on;
++	regulator-state-mem {
++		/delete-property/ regulator-off-in-suspend;
++		regulator-on-in-suspend;
++	};
++};
++
++&vcc3v3_pmu {
++	regulator-min-microvolt = <3000000>;
++	regulator-max-microvolt = <3000000>;
++	regulator-name = "vcc3v0_pmu";
++	regulator-state-mem {
++		regulator-suspend-microvolt = <3000000>;
++	};
++};
++
++&vcc_backlight {
++	regulator-min-microvolt = <2800000>;
++	regulator-max-microvolt = <2800000>;
++	regulator-name = "vcc2v8_dvp";
++	regulator-state-mem {
++		regulator-suspend-microvolt = <2800000>;
++	};
++};
++
++&vcc_lcd {
++	regulator-always-on;
++	regulator-boot-on;
++	regulator-min-microvolt = <3000000>;
++	regulator-max-microvolt = <3000000>;
++	regulator-name = "vcc3v0_dvp";
++	regulator-state-mem {
++		/delete-property/ regulator-off-in-suspend;
++		regulator-on-in-suspend;
++		regulator-suspend-microvolt = <3000000>;
++	};
++};
++
++&vcc_wifi {
++	/delete-property/ regulator-always-on;
++	/delete-property/ regulator-boot-on;
++	regulator-min-microvolt = <1500000>;
++	regulator-max-microvolt = <1500000>;
++	regulator-name = "vdd1v5_dvp";
++	regulator-state-mem {
++		regulator-suspend-microvolt = <1500000>;
++	};
++};
++
++&io_domains {
++	vccio1-supply = <&vcc1v8_soc>;
++	vccio3-supply = <&vcc_lcd>;
++};
++
++/* GPIO0_B7 is the Mini M's volume-up key, not a rumble motor. */
++&pwm0 {
++	status = "disabled";
 +};
 +
 +&backlight {
@@ -385,5 +457,5 @@ index 000000000..d06d01fab
 +	};
 +};
 -- 
-2.54.0 (Apple Git-157)
+2.47.3
 

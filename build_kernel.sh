@@ -45,6 +45,16 @@ for patch in ../scripts/kernel-${KERNEL_SRC}/*.patch; do
     exit 1
   fi
 done
+# Opt-in fixes from patches/rk3326/kernel: a unit lists only what it was tested with.
+case "$UNIT" in
+  xumini) KERNEL_OPTIN="no-async-page-flip" ;;
+  *)      KERNEL_OPTIN="" ;;
+esac
+for fix in $KERNEL_OPTIN; do
+  git apply -R --check "../patches/rk3326/kernel/${fix}.patch" 2>/dev/null && continue
+  git apply "../patches/rk3326/kernel/${fix}.patch"
+  verify_action
+done
 make ARCH=arm64 ${DEF_CONFIG}
 CFLAGS=-Wno-deprecated-declarations make -j$(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- modules_prepare
 CFLAGS=-Wno-deprecated-declarations make -j$(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image dtbs modules

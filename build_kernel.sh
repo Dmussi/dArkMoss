@@ -78,22 +78,13 @@ KERNEL_VERSION=$(basename $(ls Arkbuild/lib/modules))
 sudo cp $KERNEL_SRC/.config Arkbuild/boot/config-${KERNEL_VERSION}
 sudo cp $KERNEL_SRC/arch/arm64/boot/Image ${mountpoint}/
 sudo cp $KERNEL_SRC/arch/arm64/boot/dts/rockchip/${KERNEL_DTB} ${mountpoint}/
-if [ "$UNIT" == "g350" ]; then
-  # U-Boot's hwrev picks the dtb name by SARADC band (rg351mp, rg351v, else
-  # rg351p); a lab G350 reads 512, inside rg351v's 494-534.
-  for name in rg351mp rg351p rg351v; do
-    sudo cp /tmp/${UNIT}-uboot.dtb ${mountpoint}/${name}-uboot.dtb
-  done
+if [[ " $UBOOT_OPTIN " == *" uboot-dtb "* ]]; then
+  # image_setup.sh's opt-in: U-Boot loads only uboot.dtb, so that is the one U-Boot
+  # dtb on BOOT; every unit's dts stays in the U-Boot tree.
+  sudo cp /tmp/${UNIT}-uboot.dtb ${mountpoint}/uboot.dtb
   sudo rm /tmp/${UNIT}-uboot.dtb
-elif [ "$UNIT" == "rg351mp" ] || [ "$UNIT" == "a10mini" ] || [ "$UNIT" == "xumini" ]; then
+elif [ "$UNIT" == "rg351mp" ] || [ "$UNIT" == "g350" ] || [ "$UNIT" == "a10mini" ]; then
   sudo cp /tmp/${UNIT}-uboot.dtb ${mountpoint}/rg351mp-uboot.dtb
-  # Our hwrev patch asks for xumini-uboot.dtb (ADC 1000-1050); a unit reading
-  # elsewhere falls back to rg351p's ("unknown") or rg351v's name, so ship all.
-  if [ "$UNIT" == "xumini" ]; then
-    sudo cp /tmp/${UNIT}-uboot.dtb ${mountpoint}/xumini-uboot.dtb
-    sudo cp /tmp/${UNIT}-uboot.dtb ${mountpoint}/rg351p-uboot.dtb
-    sudo cp /tmp/${UNIT}-uboot.dtb ${mountpoint}/rg351v-uboot.dtb
-  fi
   sudo rm /tmp/${UNIT}-uboot.dtb
 elif [ "$UNIT" == "rgb10" ]; then
   sudo cp $KERNEL_SRC/arch/arm64/boot/dts/rockchip/${KERNEL_DTB_ALT} ${mountpoint}/rk3326-odroidgo2-linux-v11.dtb.oga11

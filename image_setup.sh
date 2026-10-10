@@ -25,8 +25,6 @@ cd u-boot-${CHIPSET}
 if [ "$UNIT" == "xumini" ]; then
   # xumini-uboot.dts is ours; RG351MP-u-boot has no such unit upstream.
   patch -p1 < ../patches/xumini/uboot/0001-arch-arm-dts-Makefile.patch
-  # hwrev learns the Mini M's ADC band, so it asks for xumini-uboot.dtb by name.
-  patch -p1 < ../patches/xumini/uboot/0002-hwrev-xumini.patch
   cp ../patches/xumini/uboot/xumini-uboot.dts arch/arm/dts/
 fi
 if [ "$UNIT" == "g350" ]; then
@@ -35,6 +33,16 @@ if [ "$UNIT" == "g350" ]; then
   patch -p1 < ../patches/g350/uboot/0001-g350-uboot-vccio_sd-range.patch
   verify_action
 fi
+# Opt-in fixes from patches/rk3326/uboot: a unit lists only what it was tested with.
+# uboot-dtb: U-Boot loads uboot.dtb, whatever hwrev reads; build_kernel.sh ships it.
+case "$UNIT" in
+  g350|xumini) UBOOT_OPTIN="uboot-dtb" ;;
+  *)           UBOOT_OPTIN="" ;;
+esac
+for fix in $UBOOT_OPTIN; do
+  patch -p1 < "../patches/rk3326/uboot/${fix}.patch"
+  verify_action
+done
 ./make.sh odroidgoa
 
 dd if="sd_fuse/idbloader.img" of="../${DISK}" bs=512 seek=64 conv=sync,noerror,notrunc

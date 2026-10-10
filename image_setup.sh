@@ -29,6 +29,12 @@ if [ "$UNIT" == "xumini" ]; then
   patch -p1 < ../patches/xumini/uboot/0002-hwrev-xumini.patch
   cp ../patches/xumini/uboot/xumini-uboot.dts arch/arm/dts/
 fi
+if [ "$UNIT" == "g350" ]; then
+  # g350-uboot.dts pins vccio_sd (the TF1 IO rail) at 1.8 V, so U-Boot forces it
+  # down mid-boot and loses the card; a 1.8-3.3 V range leaves it as booted.
+  patch -p1 < ../patches/g350/uboot/0001-g350-uboot-vccio_sd-range.patch
+  verify_action
+fi
 ./make.sh odroidgoa
 if [ "$UNIT" == "g350" ]; then
   # Our G350 stays dark on DDR v1.10 + miniloader v1.12: pack UnofficialOS's

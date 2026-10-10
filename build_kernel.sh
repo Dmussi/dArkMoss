@@ -53,7 +53,14 @@ KERNEL_VERSION=$(basename $(ls Arkbuild/lib/modules))
 sudo cp $KERNEL_SRC/.config Arkbuild/boot/config-${KERNEL_VERSION}
 sudo cp $KERNEL_SRC/arch/arm64/boot/Image ${mountpoint}/
 sudo cp $KERNEL_SRC/arch/arm64/boot/dts/rockchip/${KERNEL_DTB} ${mountpoint}/
-if [ "$UNIT" == "rg351mp" ] || [ "$UNIT" == "g350" ] || [ "$UNIT" == "a10mini" ]; then
+if [ "$UNIT" == "g350" ]; then
+  # U-Boot's hwrev picks the dtb name by SARADC band (rg351mp, rg351v, else
+  # rg351p); a lab G350 reads 512, inside rg351v's 494-534.
+  for name in rg351mp rg351p rg351v; do
+    sudo cp /tmp/${UNIT}-uboot.dtb ${mountpoint}/${name}-uboot.dtb
+  done
+  sudo rm /tmp/${UNIT}-uboot.dtb
+elif [ "$UNIT" == "rg351mp" ] || [ "$UNIT" == "a10mini" ]; then
   sudo cp /tmp/${UNIT}-uboot.dtb ${mountpoint}/rg351mp-uboot.dtb
   sudo rm /tmp/${UNIT}-uboot.dtb
 elif [ "$UNIT" == "rgb10" ]; then

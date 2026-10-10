@@ -83,7 +83,7 @@ if [[ " $UBOOT_OPTIN " == *" uboot-dtb "* ]]; then
   # dtb on BOOT; every unit's dts stays in the U-Boot tree.
   sudo cp /tmp/${UNIT}-uboot.dtb ${mountpoint}/uboot.dtb
   sudo rm /tmp/${UNIT}-uboot.dtb
-elif [ "$UNIT" == "rg351mp" ] || [ "$UNIT" == "g350" ] || [ "$UNIT" == "a10mini" ]; then
+elif [ "$UNIT" == "rg351mp" ] || [ "$UNIT" == "a10mini" ]; then
   sudo cp /tmp/${UNIT}-uboot.dtb ${mountpoint}/rg351mp-uboot.dtb
   sudo rm /tmp/${UNIT}-uboot.dtb
 elif [ "$UNIT" == "rgb10" ]; then

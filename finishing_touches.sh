@@ -32,8 +32,8 @@ booti \${loadaddr} \${initrd_loadaddr} \${dtb_loadaddr}
 EOF
 
 if [ "$UNIT" == "xumini" ]; then
-  # Portrait panel: U-Boot copies the BMP as-is, so the landscape logo is turned
-  # 90 degrees clockwise (480x640), the same way as the kernel's fbcon=rotate:1.
+  # Portrait panel: U-Boot copies the BMP as-is, so the G350's logo is turned 90 degrees
+  # clockwise (make-logo.py 480 640 --rotate-cw), the same way as the kernel's fbcon=rotate:1.
   sudo cp logos/xumini/logo.bmp ${mountpoint}/logo.bmp
 elif [ "$UNIT" == "g350" ]; then
   # oakMOSS-style logo from logos/make-logo.py 640 480 (bootlogo.service also shows it).
@@ -397,9 +397,9 @@ sudo cp scripts/boot_text.sh Arkbuild/usr/local/bin/
 sudo chmod 777 Arkbuild/usr/local/bin/boot_text.sh
 sudo cp scripts/welcome-message.service Arkbuild/etc/systemd/system/welcome-message.service
 sudo chroot Arkbuild/ bash -c "systemctl enable welcome-message"
-# G350: the logo stays up instead of the welcome text, which would clear it. bootlogo.service
+# G350, Mini M: the logo stays up instead of the welcome text, which would clear it. bootlogo.service
 # redraws it once the console blanks U-Boot's (upstream's image-viewer logo.service is not built).
-if [ "$UNIT" == "g350" ]; then
+if [ "$UNIT" == "g350" ] || [ "$UNIT" == "xumini" ]; then
   sudo chroot Arkbuild/ bash -c "systemctl disable welcome-message"
   sudo cp scripts/bootlogo/bootlogo.py Arkbuild/usr/local/sbin/bootlogo.py
   sudo chmod 0755 Arkbuild/usr/local/sbin/bootlogo.py

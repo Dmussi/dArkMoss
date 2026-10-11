@@ -48,7 +48,7 @@ done
 # Opt-in fixes from patches/rk3326/kernel: a unit lists only what it was tested with.
 case "$UNIT" in
   g350)   KERNEL_OPTIN="no-async-page-flip vt-csi-ignore rk817-gauge-capacity" ;;
-  xumini) KERNEL_OPTIN="no-async-page-flip" ;;
+  xumini) KERNEL_OPTIN="no-async-page-flip vt-csi-ignore rk817-gauge-capacity" ;;
   *)      KERNEL_OPTIN="" ;;
 esac
 for fix in $KERNEL_OPTIN; do

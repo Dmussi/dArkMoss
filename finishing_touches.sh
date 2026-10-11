@@ -405,10 +405,15 @@ sudo chroot Arkbuild/ bash -c "systemctl enable welcome-message"
 # redraws it once the console blanks U-Boot's (upstream's image-viewer logo.service is not built).
 if [ "$UNIT" == "g350" ] || [ "$UNIT" == "xumini" ]; then
   sudo chroot Arkbuild/ bash -c "systemctl disable welcome-message"
-  sudo cp scripts/bootlogo/bootlogo.py Arkbuild/usr/local/sbin/bootlogo.py
-  sudo chmod 0755 Arkbuild/usr/local/sbin/bootlogo.py
-  sudo cp scripts/bootlogo/bootlogo.service Arkbuild/etc/systemd/system/bootlogo.service
-  sudo chroot Arkbuild/ bash -c "systemctl enable bootlogo"
+  sudo cp scripts/bootlogo/bootlogo.py scripts/bootlogo/bootlogo-loading.sh Arkbuild/usr/local/sbin/
+  sudo chmod 0755 Arkbuild/usr/local/sbin/bootlogo.py Arkbuild/usr/local/sbin/bootlogo-loading.sh
+  sudo cp scripts/bootlogo/bootlogo.service scripts/bootlogo/bootlogo-loading.service \
+    scripts/bootlogo/bootlogo-reboot.service scripts/bootlogo/bootlogo-poweroff.service Arkbuild/etc/systemd/system/
+  # bootlogo-loading: "Loading..." from systemd's start until the logo; -reboot/-poweroff: the shutdown statuses,
+  # from the rootfs because /boot may already be unmounted when they run.
+  sudo mkdir -p Arkbuild/usr/share/bootlogo
+  sudo cp logos/${UNIT}/logo-reboot.bmp logos/${UNIT}/logo-poweroff.bmp Arkbuild/usr/share/bootlogo/
+  sudo chroot Arkbuild/ bash -c "systemctl enable bootlogo bootlogo-loading bootlogo-reboot bootlogo-poweroff"
   # The @reboot "perfnorm quiet" (only boot passes "quiet") reset tty1 at ~10 s and wiped the logo.
   sudo sed -i -e '2s/^printf "\\033c" >> \/dev\/tty1$/[ "$1" = quiet ] || &/' \
     -e 's/^  clear > \/dev\/tty1$/  [ "$1" = quiet ] || clear > \/dev\/tty1/' Arkbuild/usr/local/bin/perfnorm

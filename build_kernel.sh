@@ -100,6 +100,10 @@ elif [ "$UNIT" == "rgb10" ]; then
   sudo cp $KERNEL_SRC/arch/arm64/boot/dts/rockchip/${KERNEL_DTB_ALT_RGB10S} ${mountpoint}/rk3326-odroidgo2-linux-v11.dtb.rgb10s
 fi
 
+# G350, Mini M: "Loading..." on the console while the initramfs mounts the root (scripts/bootlogo).
+if [ "$UNIT" == "g350" ] || [ "$UNIT" == "xumini" ]; then
+  sudo install -D -m 0755 scripts/bootlogo/initramfs-loading Arkbuild/etc/initramfs-tools/scripts/init-top/darkmoss-loading
+fi
 # Create uInitrd from generated initramfs
 sudo cp /usr/bin/qemu-aarch64-static Arkbuild/usr/bin/
 KERNEL_VERSION=$(basename $(find Arkbuild/lib/modules -maxdepth 1 -mindepth 1 -type d))

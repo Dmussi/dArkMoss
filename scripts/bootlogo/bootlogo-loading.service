@@ -1,0 +1,14 @@
+[Unit]
+Description=Show "Loading..." on the blank console until the boot logo is drawn
+DefaultDependencies=no
+# The initramfs printed it already; print again once console-setup has reset the console.
+After=console-setup.service
+Before=bootlogo.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/sbin/bootlogo-loading.sh
+
+[Install]
+WantedBy=sysinit.target

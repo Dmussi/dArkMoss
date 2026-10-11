@@ -1,0 +1,9 @@
+#!/bin/sh
+# initramfs-tools init-top (G350, Mini M): "Loading..." on the blank console while the root is mounted,
+# where bootlogo-loading.sh and the logo's status line go (row 29 of the 80x30 console both units get).
+PREREQ=""
+prereqs() { echo "$PREREQ"; }
+case "$1" in
+    prereqs) prereqs; exit 0 ;;
+esac
+printf '\033[29;36HLoading...' > /dev/tty1 2>/dev/null || true

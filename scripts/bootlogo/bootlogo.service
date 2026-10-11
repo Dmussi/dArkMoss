@@ -1,6 +1,7 @@
 [Unit]
 Description=Show the boot logo while the console is blank
 DefaultDependencies=no
+ConditionKernelCommandLine=!darkmoss.debug
 # console-setup's font change redraws tty1 and would wipe the logo, so draw after it.
 After=boot.mount console-setup.service
 Before=firstboot.service spruce-launch.service

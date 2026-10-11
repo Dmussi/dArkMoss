@@ -13,10 +13,18 @@ if [ "$UNIT" == "g350" ]; then
 else
   PANEL_ARGS=""
 fi
+# G350, Mini M: with /boot/darkmoss-debug, kernel and systemd text on the panel instead of the logos
+# (every bootlogo piece skips itself on darkmoss.debug).
+if [ "$UNIT" == "g350" ] || [ "$UNIT" == "xumini" ]; then
+  DEBUG_LINE='if test -e mmc 1:1 /darkmoss-debug; then setenv bootargs "${bootargs} console=tty0 loglevel=7 systemd.show_status=1 darkmoss.debug"; fi'
+else
+  DEBUG_LINE=""
+fi
 cat <<EOF | sudo tee ${mountpoint}/boot.ini
 odroidgoa-uboot-config
 
 setenv bootargs "root=/dev/mmcblk0p2 rootwait rw fsck.repair=yes net.ifnames=0 fbcon=rotate:${SCREEN_ROTATION} console=/dev/ttyFIQ0 quiet splash consoleblank=0 vt.global_cursor_default=0${PANEL_ARGS}"
+${DEBUG_LINE}
 
 # Booting
 setenv loadaddr "0x02000000"
@@ -407,13 +415,13 @@ if [ "$UNIT" == "g350" ] || [ "$UNIT" == "xumini" ]; then
   sudo chroot Arkbuild/ bash -c "systemctl disable welcome-message"
   sudo cp scripts/bootlogo/bootlogo.py scripts/bootlogo/bootlogo-loading.sh Arkbuild/usr/local/sbin/
   sudo chmod 0755 Arkbuild/usr/local/sbin/bootlogo.py Arkbuild/usr/local/sbin/bootlogo-loading.sh
-  sudo cp scripts/bootlogo/bootlogo.service scripts/bootlogo/bootlogo-loading.service \
+  sudo cp scripts/bootlogo/bootlogo.service scripts/bootlogo/bootlogo-loading.service scripts/bootlogo/bootlogo-loading-again.service \
     scripts/bootlogo/bootlogo-reboot.service scripts/bootlogo/bootlogo-poweroff.service Arkbuild/etc/systemd/system/
   # bootlogo-loading: "Loading..." from systemd's start until the logo; -reboot/-poweroff: the shutdown statuses,
   # from the rootfs because /boot may already be unmounted when they run.
   sudo mkdir -p Arkbuild/usr/share/bootlogo
   sudo cp logos/${UNIT}/logo-reboot.bmp logos/${UNIT}/logo-poweroff.bmp Arkbuild/usr/share/bootlogo/
-  sudo chroot Arkbuild/ bash -c "systemctl enable bootlogo bootlogo-loading bootlogo-reboot bootlogo-poweroff"
+  sudo chroot Arkbuild/ bash -c "systemctl enable bootlogo bootlogo-loading bootlogo-loading-again bootlogo-reboot bootlogo-poweroff"
   # The @reboot "perfnorm quiet" (only boot passes "quiet") reset tty1 at ~10 s and wiped the logo.
   sudo sed -i -e '2s/^printf "\\033c" >> \/dev\/tty1$/[ "$1" = quiet ] || &/' \
     -e 's/^  clear > \/dev\/tty1$/  [ "$1" = quiet ] || clear > \/dev\/tty1/' Arkbuild/usr/local/bin/perfnorm

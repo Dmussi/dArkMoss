@@ -6,4 +6,5 @@ prereqs() { echo "$PREREQ"; }
 case "$1" in
     prereqs) prereqs; exit 0 ;;
 esac
+grep -qw darkmoss.debug /proc/cmdline 2>/dev/null && exit 0  # debug boots show kernel text instead
 printf '\033[29;36HLoading...' > /dev/tty1 2>/dev/null || true

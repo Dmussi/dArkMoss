@@ -6,10 +6,17 @@ if [ "$UNIT" == "rg351mp" ]; then
 else
   INITRD_LOADERADDRESS="0x04000000"
 fi
+# G350: pass U-Boot's panel-ID result to Linux (/proc/cmdline), where a per-panel
+# kernel dtb can key on it later.
+if [ "$UNIT" == "g350" ]; then
+  PANEL_ARGS=" panel_id=\${panel_id} panel_node=\${panel_node}"
+else
+  PANEL_ARGS=""
+fi
 cat <<EOF | sudo tee ${mountpoint}/boot.ini
 odroidgoa-uboot-config
 
-setenv bootargs "root=/dev/mmcblk0p2 rootwait rw fsck.repair=yes net.ifnames=0 fbcon=rotate:${SCREEN_ROTATION} console=/dev/ttyFIQ0 quiet splash consoleblank=0 vt.global_cursor_default=0"
+setenv bootargs "root=/dev/mmcblk0p2 rootwait rw fsck.repair=yes net.ifnames=0 fbcon=rotate:${SCREEN_ROTATION} console=/dev/ttyFIQ0 quiet splash consoleblank=0 vt.global_cursor_default=0${PANEL_ARGS}"
 
 # Booting
 setenv loadaddr "0x02000000"

@@ -1,0 +1,14 @@
+[Unit]
+Description=Show the boot logo while the console is blank
+DefaultDependencies=no
+# console-setup's font change redraws tty1 and would wipe the logo, so draw after it.
+After=boot.mount console-setup.service
+Before=firstboot.service spruce-launch.service
+ConditionPathExists=/boot/logo.bmp
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 -I /usr/local/sbin/bootlogo.py
+
+[Install]
+WantedBy=sysinit.target

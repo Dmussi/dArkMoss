@@ -35,6 +35,9 @@ if [ "$UNIT" == "xumini" ]; then
   # Portrait panel: U-Boot copies the BMP as-is, so the landscape logo is turned
   # 90 degrees clockwise (480x640), the same way as the kernel's fbcon=rotate:1.
   sudo cp logos/xumini/logo.bmp ${mountpoint}/logo.bmp
+elif [ "$UNIT" == "g350" ]; then
+  # oakMOSS-style logo from logos/make-logo.py 640 480 (bootlogo.service also shows it).
+  sudo cp logos/g350/logo.bmp ${mountpoint}/logo.bmp
 else
   sudo cp logos/unrotated/dArkMoss.bmp ${mountpoint}/logo.bmp
 fi
@@ -298,8 +301,6 @@ elif [[ "$UNIT" == "rg351mp" ]] || [[ "$UNIT" == "g350" ]] || [[ "$UNIT" == "a10
   sudo cp device/rg351mp/*.service Arkbuild/etc/systemd/system/
   sudo chroot Arkbuild/ bash -c "systemctl enable 351mp batt_led"
 fi
-# No G350 logo.service: it shows /boot/logo.bmp with image-viewer, which is
-# not built into dArkMoss.
 
 # Make all scripts in /usr/local/bin executable, world style
 sudo chmod 777 Arkbuild/usr/local/bin/*
@@ -396,6 +397,15 @@ sudo cp scripts/boot_text.sh Arkbuild/usr/local/bin/
 sudo chmod 777 Arkbuild/usr/local/bin/boot_text.sh
 sudo cp scripts/welcome-message.service Arkbuild/etc/systemd/system/welcome-message.service
 sudo chroot Arkbuild/ bash -c "systemctl enable welcome-message"
+# G350: the logo stays up instead of the welcome text, which would clear it. bootlogo.service
+# redraws it once the console blanks U-Boot's (upstream's image-viewer logo.service is not built).
+if [ "$UNIT" == "g350" ]; then
+  sudo chroot Arkbuild/ bash -c "systemctl disable welcome-message"
+  sudo cp scripts/bootlogo/bootlogo.py Arkbuild/usr/local/sbin/bootlogo.py
+  sudo chmod 0755 Arkbuild/usr/local/sbin/bootlogo.py
+  sudo cp scripts/bootlogo/bootlogo.service Arkbuild/etc/systemd/system/bootlogo.service
+  sudo chroot Arkbuild/ bash -c "systemctl enable bootlogo"
+fi
 
 # Mark completed dArkMoss updates with this current build
 release_tags=( $(git -c 'versionsort.suffix=-' ls-remote --tags --sort='v:refname' https://github.com/christianhaitian/darkos-updates.git | cut -d/ -f3- | sed 's/^v//I') )

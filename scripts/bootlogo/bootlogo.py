@@ -1,19 +1,23 @@
 #!/usr/bin/python3 -I
-# Redraw /boot/logo.bmp (the logo U-Boot shows) on the framebuffer the console blanked.
+# Redraw U-Boot's logo, as its status-line variant when BOOT has one, on the framebuffer the console blanked.
 # tty1 output (firstboot's dialog, mount-spruce's messages) or the frontend's first frame replaces it.
 #   bootlogo.py [--check]    --check converts and times it but leaves the screen alone
 import fcntl
+import os
 import struct
 import sys
 import time
 
 LOGO, FB = "/boot/logo.bmp", "/dev/fb0"
+# U-Boot's logo with a status line (make-logo.py --status); firstboot.sh is gone once the card is set up.
+STATUS = "/boot/logo-firstboot.bmp" if os.path.exists("/boot/firstboot.sh") else "/boot/logo-boot.bmp"
 FBIOGET_VSCREENINFO = 0x4600
 
 
 def main(check):
     t0 = time.monotonic()
-    with open(LOGO, "rb") as f:
+    path = STATUS if os.path.exists(STATUS) else LOGO
+    with open(path, "rb") as f:
         bmp = f.read()
     off, = struct.unpack_from("<I", bmp, 10)
     bw, bh = struct.unpack_from("<ii", bmp, 18)
@@ -41,7 +45,7 @@ def main(check):
         if not check:
             fb.seek(yoff * stride)
             fb.write(out)
-    print(f"bootlogo: {'checked' if check else 'drew'} {LOGO} in {time.monotonic() - t0:.3f} s", file=sys.stderr)
+    print(f"bootlogo: {'checked' if check else 'drew'} {path} in {time.monotonic() - t0:.3f} s", file=sys.stderr)
 
 
 if __name__ == "__main__":

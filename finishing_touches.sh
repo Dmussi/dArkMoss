@@ -41,6 +41,10 @@ elif [ "$UNIT" == "g350" ]; then
 else
   sudo cp logos/unrotated/dArkMoss.bmp ${mountpoint}/logo.bmp
 fi
+# bootlogo.service's redraw: that logo plus oakMOSS's status line (make-logo.py --status).
+if [ "$UNIT" == "g350" ] || [ "$UNIT" == "xumini" ]; then
+  sudo cp logos/${UNIT}/logo-boot.bmp logos/${UNIT}/logo-firstboot.bmp ${mountpoint}/
+fi
 
 if [ -d "optional" ]; then
   if [ ! -z "$(find optional/ -mindepth 1 -maxdepth 1)" ]; then

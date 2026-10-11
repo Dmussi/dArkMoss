@@ -405,6 +405,11 @@ if [ "$UNIT" == "g350" ]; then
   sudo chmod 0755 Arkbuild/usr/local/sbin/bootlogo.py
   sudo cp scripts/bootlogo/bootlogo.service Arkbuild/etc/systemd/system/bootlogo.service
   sudo chroot Arkbuild/ bash -c "systemctl enable bootlogo"
+  # The @reboot "perfnorm quiet" (only boot passes "quiet") reset tty1 at ~10 s and wiped the logo.
+  sudo sed -i -e '2s/^printf "\\033c" >> \/dev\/tty1$/[ "$1" = quiet ] || &/' \
+    -e 's/^  clear > \/dev\/tty1$/  [ "$1" = quiet ] || clear > \/dev\/tty1/' Arkbuild/usr/local/bin/perfnorm
+  [ "$(grep -cF '[ "$1" = quiet ] ||' Arkbuild/usr/local/bin/perfnorm)" = 2 ]
+  verify_action
 fi
 
 # Mark completed dArkMoss updates with this current build

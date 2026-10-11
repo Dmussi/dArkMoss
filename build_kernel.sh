@@ -47,7 +47,8 @@ for patch in ../scripts/kernel-${KERNEL_SRC}/*.patch; do
 done
 # Opt-in fixes from patches/rk3326/kernel: a unit lists only what it was tested with.
 case "$UNIT" in
-  xumini|g350) KERNEL_OPTIN="no-async-page-flip" ;;
+  g350)   KERNEL_OPTIN="no-async-page-flip vt-csi-ignore" ;;
+  xumini) KERNEL_OPTIN="no-async-page-flip" ;;
   *)      KERNEL_OPTIN="" ;;
 esac
 for fix in $KERNEL_OPTIN; do

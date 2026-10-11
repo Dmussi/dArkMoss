@@ -43,6 +43,8 @@ fi
 source ./build_ogacontrols.sh
 source ./build_gptokeyb.sh
 source ./build_drmtool.sh
+# BatteryPlus: Knulli's voltage-based battery %, as upstream builds for the RG351MP.
+source ./build_batteryplus.sh
 source ./finishing_touches.sh
 source ./setup_spruce_handoff.sh
 source ./cleanup_filesystem.sh

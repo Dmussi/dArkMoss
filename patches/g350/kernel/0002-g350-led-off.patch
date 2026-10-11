@@ -1,0 +1,14 @@
+rk3326-g350-linux: leave the blue LED (GPIO0_C1) off, as BatleXP's own device tree does,
+instead of blinking it as a heartbeat.
+
+--- a/arch/arm64/boot/dts/rockchip/rk3326-g350-linux.dts
++++ b/arch/arm64/boot/dts/rockchip/rk3326-g350-linux.dts
+@@ -277,7 +277,7 @@
+ 		heartbeat {
+ 			label = "blue:heartbeat";
+ 			gpios = <&gpio0 RK_PC1 GPIO_ACTIVE_HIGH>;
+-			linux,default-trigger = "heartbeat";
++			default-state = "off";
+ 		};
+ 	};
+ 

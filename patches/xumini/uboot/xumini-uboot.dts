@@ -572,7 +572,7 @@
 			min_input_voltage = <4500>;
 			max_input_current = <1500>;
 			max_chrg_current = <2000>;
-			max_chrg_voltage = <4400>;
+			max_chrg_voltage = <4200>;
 			chrg_term_mode = <0>;
 			chrg_finish_cur = <52>;
 			virtual_power = <0>;

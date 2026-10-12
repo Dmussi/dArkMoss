@@ -408,7 +408,7 @@ index 000000000..e21f1c58c
 +	};
 +
 +	charger {
-+		max_chrg_voltage = <4400>;
++		max_chrg_voltage = <4200>;
 +	};
 +};
 +

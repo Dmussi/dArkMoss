@@ -17,7 +17,7 @@ index e21f1c5..4ed20b0 100644
 @@ -375,6 +375,8 @@
  
  	charger {
- 		max_chrg_voltage = <4400>;
+ 		max_chrg_voltage = <4200>;
 +		/* dc_det_gpio is not wired here: charger detection by the PMIC plug-in status */
 +		pmic_plug_det;
  	};

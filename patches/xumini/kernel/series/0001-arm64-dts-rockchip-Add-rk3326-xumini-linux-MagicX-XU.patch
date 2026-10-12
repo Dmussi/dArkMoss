@@ -398,11 +398,11 @@ index 000000000..e21f1c58c
 +
 +	/* Mini M's own 2300mAh pack profile and charge-voltage ceiling. */
 +	battery {
-+		ocv_table = <3158 3434 3495 3546 3584 3617 3647
-+			3676 3701 3724 3753 3793 3843 3896
-+			3950 4009 4068 4124 4178 4245 4330>;
++		ocv_table = <3158 3411 3485 3533 3571 3603 3632
++			3659 3684 3707 3729 3756 3793 3839
++			3887 3936 3989 4043 4096 4146 4200>;
 +		/* UnofficialOS's simple-battery node gives 2600 mAh; Knulli's
-+		   DTB has 2300. Capacity only; the OCV table stays Knulli's. */
++		   DTB has 2300. Knulli's OCV table, rescaled so 4.2 V is 100%. */
 +		design_capacity = <2600>;
 +		design_qmax = <2600>;
 +	};

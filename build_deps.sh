@@ -52,6 +52,16 @@ if [ "$DEPS_FROM_CACHE" = "y" ]; then
   [ ! -d "${CHROOT_DIR}/home/ark/Arkbuild_ccache" ] && sudo mkdir -p ${CHROOT_DIR}/home/ark/Arkbuild_ccache
   sudo mount --bind ${PWD}/Arkbuild_ccache ${CHROOT_DIR}/home/ark/Arkbuild_ccache
   sudo chroot ${CHROOT_DIR}/ ldconfig -X
+  # The tarball leaves out the firmware trees, so the firmware packages come back
+  # with no files. rk3566's kernel cache stages its own firmware there (BT blobs
+  # included), so only rk3326, whose kernel brings none, reinstalls them.
+  if [ "$CHIPSET" == "rk3326" ]; then
+    FIRMWARE_PACKAGES=$(grep '^firmware-' needed_packages.txt | tr '\n' ' ')
+    sudo chroot ${CHROOT_DIR}/ apt -y update
+    updateapt="Y"
+    sudo chroot ${CHROOT_DIR}/ bash -c "DEBIAN_FRONTEND=noninteractive eatmydata apt -y install --reinstall ${FIRMWARE_PACKAGES}"
+    verify_action
+  fi
 else
 
 # Install additional needed packages and protect them from autoremove.

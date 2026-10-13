@@ -152,6 +152,7 @@ fi
 case "$UNIT" in
   rgb30)     HW_DEVICE_NAME="Powkiddy RGB30" ;;
   miniloong) HW_DEVICE_NAME="Miniloong Pocket 1" ;;
+  353m)      HW_DEVICE_NAME="Anbernic RG353M" ;;
   a10mini)   HW_DEVICE_NAME="A10 Mini" ;;
   g350)      HW_DEVICE_NAME="G350" ;;
   xumini)    HW_DEVICE_NAME="XU Mini M" ;;
@@ -167,6 +168,7 @@ fi
 case "$UNIT" in
   rgb30)     SPRUCE_PLATFORM_NAME="RGB30" ;;
   miniloong) SPRUCE_PLATFORM_NAME="Miniloong" ;;
+  353m)      SPRUCE_PLATFORM_NAME="RG353M" ;;
   a10mini)   SPRUCE_PLATFORM_NAME="A10Mini" ;;
   g350)      SPRUCE_PLATFORM_NAME="G350" ;;
   xumini)    SPRUCE_PLATFORM_NAME="XUMiniM" ;;

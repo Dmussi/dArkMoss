@@ -24,7 +24,7 @@ elif [[ "$ROOT_FILESYSTEM_FORMAT" == *"ext"* ]]; then
   ROOT_FILESYSTEM_MOUNT_OPTIONS="defaults,noatime"
 fi
 if [[ "$UNIT" == *"353"* ]] || [[ "$UNIT" == *"503"* ]]; then
-  DISK="dArkMoss_RG${UNIT}_${DEBIAN_CODE_NAME}_${BUILD_DATE}.img"
+  DISK="dArkMoss_RG${UNIT^^}_${DEBIAN_CODE_NAME}_${BUILD_DATE}.img"
 else
   iName=`echo ${UNIT} | tr '[:lower:]' '[:upper:]'`
   DISK="dArkMoss_${iName}_${DEBIAN_CODE_NAME}_${BUILD_DATE}.img"

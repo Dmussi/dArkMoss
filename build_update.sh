@@ -16,19 +16,22 @@
 
 echo -e "Packing the update payload...\n\n"
 
-iName=$(echo ${UNIT} | tr '[:lower:]' '[:upper:]')
-DMUPD_VERSION="${DARKMOSS_VERSION:-$BUILD_DATE}"
-DMUPD="dArkMoss_${iName}_${DMUPD_VERSION}.dmupd"
 WORK="$(mktemp -d)"
 
 case "$UNIT" in
   rgb30)     DMUPD_PLATFORM="RGB30" ;;
   miniloong) DMUPD_PLATFORM="Miniloong" ;;
+  353m)      DMUPD_PLATFORM="RG353M" ;;
   a10mini)   DMUPD_PLATFORM="A10Mini" ;;
   g350)      DMUPD_PLATFORM="G350" ;;
   xumini)    DMUPD_PLATFORM="XUMiniM" ;;
   *)         DMUPD_PLATFORM="" ;;
 esac
+
+# spruce's Firmware Update app finds the payload by its SPRUCE_PLATFORM, upper-cased.
+iName=$(echo ${DMUPD_PLATFORM:-$UNIT} | tr '[:lower:]' '[:upper:]')
+DMUPD_VERSION="${DARKMOSS_VERSION:-$BUILD_DATE}"
+DMUPD="dArkMoss_${iName}_${DMUPD_VERSION}.dmupd"
 
 # Device state and build-only artefacts, matched against absolute paths. The
 # same list gates the layer and remove.list.

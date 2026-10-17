@@ -51,7 +51,12 @@ else
 fi
 
 extension=$(sudo grep -oP '(?<=extension=").*?(?=")' ${CHROOT_DIR}/home/ark/${CHIPSET}_core_builds/scripts/sdl2.sh)
-if [ "$UNIT" == "xumini" ]; then
+if [ "$UNIT" == "rgb10" ]; then
+  # V10/RGB10: the stock odroidgoa RGA ROT_270 build (the "...rotated" one) for
+  # their 320x480 portrait panel, not the a10miniv4 rotate180 pass that
+  # "make install" leaves in place (see xumini below).
+  sudo chroot ${CHROOT_DIR}/ bash -c "cp -f /home/ark/${CHIPSET}_core_builds/sdl2-${BITNESS}/libSDL2-2.0.so.0.$extension.rotated /usr/lib/${ARCH}/libSDL2-2.0.so.0.$extension"
+elif [ "$UNIT" == "xumini" ]; then
   # The chroot's own "make install" left the LAST build in place (a10miniv4's
   # rotate180 pass, unconditional upstream); install our ROT_90 variant
   # instead, saved mid-build as "...rotated" before that pass ran.

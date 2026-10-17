@@ -155,6 +155,7 @@ case "$UNIT" in
   353m)      HW_DEVICE_NAME="Anbernic RG353M" ;;
   a10mini)   HW_DEVICE_NAME="A10 Mini" ;;
   g350)      HW_DEVICE_NAME="G350" ;;
+  rgb10)     HW_DEVICE_NAME="Powkiddy V10" ;;
   xumini)    HW_DEVICE_NAME="XU Mini M" ;;
   *)         HW_DEVICE_NAME="" ;;
 esac
@@ -171,6 +172,7 @@ case "$UNIT" in
   353m)      SPRUCE_PLATFORM_NAME="RG353M" ;;
   a10mini)   SPRUCE_PLATFORM_NAME="A10Mini" ;;
   g350)      SPRUCE_PLATFORM_NAME="G350" ;;
+  rgb10)     SPRUCE_PLATFORM_NAME="V10" ;;
   xumini)    SPRUCE_PLATFORM_NAME="XUMiniM" ;;
   *)         SPRUCE_PLATFORM_NAME="" ;;
 esac

@@ -23,7 +23,7 @@ ifeq ($(DEBIAN_CODE_NAME),)
 endif
 
 all:
-	@echo "Please specify a valid build target. dArkMoss targets: make rgb30, make miniloong, make a10mini, make g350, make rgb10, make xumini, make rg353m"
+	@echo "Please specify a valid build target. dArkMoss targets: make rgb30, make miniloong, make a10mini, make g350, make rgb10, make v10, make xumini, make rg353m"
 
 a10mini:
 	$(info dArkOS will be built using the $(DEBIAN_CODE_NAME) release of Debian.)
@@ -60,6 +60,13 @@ rgb10:
 	$(info adding armhf 32bit userspace? ${BUILD_ARMHF})
 	@sleep 5
 	./build_rgb10.sh
+
+v10:
+	$(info dArkOS will be built using the $(DEBIAN_CODE_NAME) release of Debian.)
+	$(info debian building caching enabled? ${ENABLE_CACHE})
+	$(info adding armhf 32bit userspace? ${BUILD_ARMHF})
+	@sleep 5
+	./build_v10.sh
 
 rgb20pro:
 	$(info dArkOS will be built using the $(DEBIAN_CODE_NAME) release of Debian.)

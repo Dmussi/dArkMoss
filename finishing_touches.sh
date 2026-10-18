@@ -201,7 +201,7 @@ sudo cp dArkOS_Tools/*.sh Arkbuild/opt/system/
 sudo cp dArkOS_Tools/${CHIPSET}/*.sh Arkbuild/opt/system/Advanced/
 sudo cp dArkOS_Tools/Advanced/*.sh Arkbuild/opt/system/Advanced/
 sudo cp scripts/"Enable Quick Mode".sh Arkbuild/opt/system/Advanced/
-if [[ "$UNIT" == *"rgb10"* ]] || [[ "$UNIT" == "rk2020" ]] || [[ "$UNIT" == *"oga"* ]]; then
+if [[ "$UNIT" == *"rgb10"* ]] || [[ "$UNIT" == "v10" ]] || [[ "$UNIT" == "rk2020" ]] || [[ "$UNIT" == *"oga"* ]]; then
   sudo cp dArkOS_Tools/OGA/*.sh Arkbuild/opt/system/Advanced/
 else
   sudo cp scripts/Switch* Arkbuild/usr/local/bin/
@@ -323,7 +323,7 @@ sudo chroot Arkbuild/ bash -c "ln -sfv /roms/themes/ /etc/emulationstation/theme
 
 # Also expose /roms2/themes via the user themes path so ES picks up themes
 # from the second SD card in SD2-for-Roms mode (dangles harmlessly otherwise).
-if [[ "$UNIT" != *"rgb10"* ]] && [[ "$UNIT" != "rk2020" ]] && [[ "$UNIT" != *"oga"* ]]; then
+if [[ "$UNIT" != *"rgb10"* ]] && [[ "$UNIT" != "v10" ]] && [[ "$UNIT" != "rk2020" ]] && [[ "$UNIT" != *"oga"* ]]; then
   sudo chroot Arkbuild/ bash -c "ln -sfv /roms2/themes/ /home/ark/.emulationstation/themes"
 fi
 
@@ -379,7 +379,7 @@ cat <<EOF | sudo tee -a Arkbuild/etc/samba/smb.conf
    guest ok = yes
    read list = guest
 EOF
-if [[ "$UNIT" != *"rgb10"* ]] && [[ "$UNIT" != "rk2020" ]] && [[ "$UNIT" != *"oga"* ]]; then
+if [[ "$UNIT" != *"rgb10"* ]] && [[ "$UNIT" != "v10" ]] && [[ "$UNIT" != "rk2020" ]] && [[ "$UNIT" != *"oga"* ]]; then
   cat <<EOF | sudo tee -a Arkbuild/etc/samba/smb.conf
 [roms2]
    comment = ROMS2

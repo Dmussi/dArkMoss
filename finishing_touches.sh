@@ -20,10 +20,22 @@ if [ "$UNIT" == "g350" ] || [ "$UNIT" == "xumini" ]; then
 else
   DEBUG_LINE=""
 fi
+# V10: no initramfs, as Hardkernel's own OGA boot: the rg351 kernel has the SD
+# host and btrfs built in, so the 36 MB ramdisk only added a load, an unpack and
+# a second udev pass (~3 s in a V10 boot log).
+if [ "$UNIT" == "v10" ]; then
+  ROOTFS_ARGS=" rootfstype=btrfs"
+  INITRD_LOAD_LINE=""
+  BOOTI_LINE='booti ${loadaddr} - ${dtb_loadaddr}'
+else
+  ROOTFS_ARGS=""
+  INITRD_LOAD_LINE='load mmc 1:1 ${initrd_loadaddr} uInitrd'
+  BOOTI_LINE='booti ${loadaddr} ${initrd_loadaddr} ${dtb_loadaddr}'
+fi
 cat <<EOF | sudo tee ${mountpoint}/boot.ini
 odroidgoa-uboot-config
 
-setenv bootargs "root=/dev/mmcblk0p2 rootwait rw fsck.repair=yes net.ifnames=0 fbcon=rotate:${SCREEN_ROTATION} console=/dev/ttyFIQ0 quiet splash consoleblank=0 vt.global_cursor_default=0${PANEL_ARGS}"
+setenv bootargs "root=/dev/mmcblk0p2 rootwait rw fsck.repair=yes net.ifnames=0 fbcon=rotate:${SCREEN_ROTATION} console=/dev/ttyFIQ0 quiet splash consoleblank=0 vt.global_cursor_default=0${PANEL_ARGS}${ROOTFS_ARGS}"
 ${DEBUG_LINE}
 
 # Booting
@@ -32,11 +44,11 @@ setenv initrd_loadaddr "${INITRD_LOADERADDRESS}"
 setenv dtb_loadaddr "0x01f00000"
 
 load mmc 1:1 \${loadaddr} Image
-load mmc 1:1 \${initrd_loadaddr} uInitrd
+${INITRD_LOAD_LINE}
 
 load mmc 1:1 \${dtb_loadaddr} ${KERNEL_DTB}
 
-booti \${loadaddr} \${initrd_loadaddr} \${dtb_loadaddr}
+${BOOTI_LINE}
 EOF
 
 if [ "$UNIT" == "xumini" ]; then
@@ -122,6 +134,13 @@ sudo cp amiga/amiga.sh Arkbuild/usr/local/bin/
 #Generate the post-firstboot fstab. No /roms line: mount-spruce.sh mounts spruce.
 if [ "$ROOT_FILESYSTEM_FORMAT" == "btrfs" ]; then
   ROOT_FILESYSTEM_MOUNT_OPTIONS="${ROOT_FILESYSTEM_MOUNT_OPTIONS},ssd_spread"
+fi
+# V10: the 4.4 kernel has no compression levels, so "compress=zlib:1" failed
+# systemd-remount-fs on every boot; plain "zlib" is the same algorithm. This is
+# the fstab firstboot installs (expandtoexfat), the image's own is fixed in
+# setup_spruce_handoff.sh.
+if [ "$UNIT" == "v10" ]; then
+  ROOT_FILESYSTEM_MOUNT_OPTIONS="${ROOT_FILESYSTEM_MOUNT_OPTIONS//compress=zlib:1/compress=zlib}"
 fi
 cat <<EOF | sudo tee ${mountpoint}/fstab.exfat
 /dev/mmcblk0p2 / ${ROOT_FILESYSTEM_FORMAT} ${ROOT_FILESYSTEM_MOUNT_OPTIONS} 0 0

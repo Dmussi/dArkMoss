@@ -76,12 +76,39 @@ jobs:
           pattern: dArkMoss-*
           merge-multiple: true
 
+      # The V10 shares one card with spruce, whose V10 files are not upstream yet:
+      # attach them as spruce-V10-overlay.zip (every file the owner's spruceOS
+      # fork changes on its v10 branch) and add the install steps to the notes.
+      - name: Check out (release notes)
+        if: ${{ contains(needs.plan.outputs.units, '"v10"') || contains(needs.plan.outputs.units, '"rgb10"') }}
+        uses: actions/checkout@v4
+        with:
+          path: src
+
+      - name: V10 spruce overlay
+        if: ${{ contains(needs.plan.outputs.units, '"v10"') || contains(needs.plan.outputs.units, '"rgb10"') }}
+        env:
+          OVERLAY_REPO: ${{ github.repository_owner }}/spruceOS
+        run: |
+          GIT_LFS_SKIP_SMUDGE=1 git clone -q --filter=blob:none --no-checkout -b v10 "https://github.com/${OVERLAY_REPO}" spruce-src
+          cd spruce-src
+          git fetch -q origin Development
+          base="$(git merge-base FETCH_HEAD HEAD)"
+          git diff --name-only --diff-filter=ACMR "$base" HEAD > ../overlay-files.txt
+          [ -s ../overlay-files.txt ] || { echo "::error::no V10 files on ${OVERLAY_REPO} v10"; exit 1; }
+          tr '\n' '\0' < ../overlay-files.txt | xargs -0 git archive --format=zip -o ../spruce-V10-overlay.zip HEAD --
+          cd ..
+          rm -rf spruce-src
+          unzip -l spruce-V10-overlay.zip | tail -1
+          cp src/.github/v10-release-notes.md v10-notes.md
+
       - name: Checksums
         run: |
           shopt -s nullglob
           imgs=( *.img.7z* )
           [ ${#imgs[@]} -gt 0 ] || { echo "::error::no unit produced an image"; exit 1; }
-          sha256sum *.img.7z* *.dmupd > SHA256SUMS
+          extra=(); [ -f spruce-V10-overlay.zip ] && extra=(spruce-V10-overlay.zip)
+          sha256sum *.img.7z* *.dmupd "${extra[@]}" > SHA256SUMS
           ls -lh *.img.7z* *.dmupd SHA256SUMS
 
       - name: Publish the beta
@@ -108,7 +135,8 @@ jobs:
             done
             cat old.sums SHA256SUMS | sort -k2 > merged.sums
             mv merged.sums SHA256SUMS
-            gh release upload "$TAG" *.img.7z* *.dmupd SHA256SUMS --repo "$GITHUB_REPOSITORY" --clobber
+            extra=(); [ -f spruce-V10-overlay.zip ] && extra=(spruce-V10-overlay.zip)
+            gh release upload "$TAG" *.img.7z* *.dmupd "${extra[@]}" SHA256SUMS --repo "$GITHUB_REPOSITORY" --clobber
             echo "Rebuilt $(jq -r 'join(" ")' <<<"$UNITS") at ${GITHUB_SHA}" >> notes.md
             gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes-file notes.md
             exit 0
@@ -122,7 +150,9 @@ jobs:
           Commit: ${GITHUB_SHA}
           Units: $(jq -r 'join(" ")' <<<"$UNITS")
           EOF
-          gh release create "$TAG" *.img.7z* *.dmupd SHA256SUMS \
+          [ -f v10-notes.md ] && cat v10-notes.md >> notes.md
+          extra=(); [ -f spruce-V10-overlay.zip ] && extra=(spruce-V10-overlay.zip)
+          gh release create "$TAG" *.img.7z* *.dmupd "${extra[@]}" SHA256SUMS \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "Beta Build (${GITHUB_REF_NAME}) ${VERSION}" \

@@ -4,3 +4,4 @@ a10mini
 g350
 xumini
 rg353m
+v10

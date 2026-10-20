@@ -20,10 +20,22 @@ if [ "$UNIT" == "g350" ] || [ "$UNIT" == "xumini" ]; then
 else
   DEBUG_LINE=""
 fi
+# V10: no initramfs, as Hardkernel's own OGA boot: the rg351 kernel has the SD
+# host and btrfs built in, so the 36 MB ramdisk only added a load, an unpack and
+# a second udev pass (~3 s in a V10 boot log).
+if [ "$UNIT" == "v10" ]; then
+  ROOTFS_ARGS=" rootfstype=btrfs"
+  INITRD_LOAD_LINE=""
+  BOOTI_LINE='booti ${loadaddr} - ${dtb_loadaddr}'
+else
+  ROOTFS_ARGS=""
+  INITRD_LOAD_LINE='load mmc 1:1 ${initrd_loadaddr} uInitrd'
+  BOOTI_LINE='booti ${loadaddr} ${initrd_loadaddr} ${dtb_loadaddr}'
+fi
 cat <<EOF | sudo tee ${mountpoint}/boot.ini
 odroidgoa-uboot-config
 
-setenv bootargs "root=/dev/mmcblk0p2 rootwait rw fsck.repair=yes net.ifnames=0 fbcon=rotate:${SCREEN_ROTATION} console=/dev/ttyFIQ0 quiet splash consoleblank=0 vt.global_cursor_default=0${PANEL_ARGS}"
+setenv bootargs "root=/dev/mmcblk0p2 rootwait rw fsck.repair=yes net.ifnames=0 fbcon=rotate:${SCREEN_ROTATION} console=/dev/ttyFIQ0 quiet splash consoleblank=0 vt.global_cursor_default=0${PANEL_ARGS}${ROOTFS_ARGS}"
 ${DEBUG_LINE}
 
 # Booting
@@ -32,11 +44,11 @@ setenv initrd_loadaddr "${INITRD_LOADERADDRESS}"
 setenv dtb_loadaddr "0x01f00000"
 
 load mmc 1:1 \${loadaddr} Image
-load mmc 1:1 \${initrd_loadaddr} uInitrd
+${INITRD_LOAD_LINE}
 
 load mmc 1:1 \${dtb_loadaddr} ${KERNEL_DTB}
 
-booti \${loadaddr} \${initrd_loadaddr} \${dtb_loadaddr}
+${BOOTI_LINE}
 EOF
 
 if [ "$UNIT" == "xumini" ]; then
@@ -123,6 +135,13 @@ sudo cp amiga/amiga.sh Arkbuild/usr/local/bin/
 if [ "$ROOT_FILESYSTEM_FORMAT" == "btrfs" ]; then
   ROOT_FILESYSTEM_MOUNT_OPTIONS="${ROOT_FILESYSTEM_MOUNT_OPTIONS},ssd_spread"
 fi
+# V10: the 4.4 kernel has no compression levels, so "compress=zlib:1" failed
+# systemd-remount-fs on every boot; plain "zlib" is the same algorithm. This is
+# the fstab firstboot installs (expandtoexfat), the image's own is fixed in
+# setup_spruce_handoff.sh.
+if [ "$UNIT" == "v10" ]; then
+  ROOT_FILESYSTEM_MOUNT_OPTIONS="${ROOT_FILESYSTEM_MOUNT_OPTIONS//compress=zlib:1/compress=zlib}"
+fi
 cat <<EOF | sudo tee ${mountpoint}/fstab.exfat
 /dev/mmcblk0p2 / ${ROOT_FILESYSTEM_FORMAT} ${ROOT_FILESYSTEM_MOUNT_OPTIONS} 0 0
 
@@ -201,7 +220,7 @@ sudo cp dArkOS_Tools/*.sh Arkbuild/opt/system/
 sudo cp dArkOS_Tools/${CHIPSET}/*.sh Arkbuild/opt/system/Advanced/
 sudo cp dArkOS_Tools/Advanced/*.sh Arkbuild/opt/system/Advanced/
 sudo cp scripts/"Enable Quick Mode".sh Arkbuild/opt/system/Advanced/
-if [[ "$UNIT" == *"rgb10"* ]] || [[ "$UNIT" == "rk2020" ]] || [[ "$UNIT" == *"oga"* ]]; then
+if [[ "$UNIT" == *"rgb10"* ]] || [[ "$UNIT" == "v10" ]] || [[ "$UNIT" == "rk2020" ]] || [[ "$UNIT" == *"oga"* ]]; then
   sudo cp dArkOS_Tools/OGA/*.sh Arkbuild/opt/system/Advanced/
 else
   sudo cp scripts/Switch* Arkbuild/usr/local/bin/
@@ -323,7 +342,7 @@ sudo chroot Arkbuild/ bash -c "ln -sfv /roms/themes/ /etc/emulationstation/theme
 
 # Also expose /roms2/themes via the user themes path so ES picks up themes
 # from the second SD card in SD2-for-Roms mode (dangles harmlessly otherwise).
-if [[ "$UNIT" != *"rgb10"* ]] && [[ "$UNIT" != "rk2020" ]] && [[ "$UNIT" != *"oga"* ]]; then
+if [[ "$UNIT" != *"rgb10"* ]] && [[ "$UNIT" != "v10" ]] && [[ "$UNIT" != "rk2020" ]] && [[ "$UNIT" != *"oga"* ]]; then
   sudo chroot Arkbuild/ bash -c "ln -sfv /roms2/themes/ /home/ark/.emulationstation/themes"
 fi
 
@@ -379,7 +398,7 @@ cat <<EOF | sudo tee -a Arkbuild/etc/samba/smb.conf
    guest ok = yes
    read list = guest
 EOF
-if [[ "$UNIT" != *"rgb10"* ]] && [[ "$UNIT" != "rk2020" ]] && [[ "$UNIT" != *"oga"* ]]; then
+if [[ "$UNIT" != *"rgb10"* ]] && [[ "$UNIT" != "v10" ]] && [[ "$UNIT" != "rk2020" ]] && [[ "$UNIT" != *"oga"* ]]; then
   cat <<EOF | sudo tee -a Arkbuild/etc/samba/smb.conf
 [roms2]
    comment = ROMS2

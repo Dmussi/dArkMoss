@@ -17,10 +17,15 @@ else
   DEF_CONFIG="rg351p_tweaked_defconfig"
   if [ "$UNIT" == "xumini" ]; then
     SCREEN_ROTATION="1"
+  elif [ "$UNIT" == "v10" ]; then
+    # 320x480 portrait panel, as the OGA kernel boots it (rgb10 above).
+    SCREEN_ROTATION="3"
   else
     SCREEN_ROTATION="0"
   fi
   KERNEL_DTB="${CHIPSET}-${UNIT}-linux.dtb"
+  # V10: no dts of its own; rg351 carries the OGA 1.1 one dArkOS boots it with.
+  [ "$UNIT" == "v10" ] && KERNEL_DTB="${CHIPSET}-odroidgo2-linux-v11.dtb"
 fi
 if [ ! -d "$KERNEL_SRC" ]; then
   git clone --recursive --depth=1 https://github.com/christianhaitian/linux.git -b $KERNEL_SRC $KERNEL_SRC
@@ -48,6 +53,7 @@ done
 # Opt-in fixes from patches/rk3326/kernel: a unit lists only what it was tested with.
 case "$UNIT" in
   g350)   KERNEL_OPTIN="no-async-page-flip vt-csi-ignore rk817-gauge-capacity" ;;
+  v10)    KERNEL_OPTIN="no-async-page-flip vt-csi-ignore rk817-gauge-capacity" ;;
   xumini) KERNEL_OPTIN="no-async-page-flip vt-csi-ignore rk817-gauge-capacity rk817-plugin-online" ;;
   *)      KERNEL_OPTIN="" ;;
 esac
@@ -97,7 +103,7 @@ elif [ "$UNIT" == "rg351mp" ] || [ "$UNIT" == "a10mini" ]; then
   sudo rm /tmp/${UNIT}-uboot.dtb
 elif [ "$UNIT" == "rgb10" ]; then
   sudo cp $KERNEL_SRC/arch/arm64/boot/dts/rockchip/${KERNEL_DTB_ALT} ${mountpoint}/rk3326-odroidgo2-linux-v11.dtb.oga11
-  sudo cp $KERNEL_SRC/arch/arm64/boot/dts/rockchip/${KERNEL_DTB_ALT_RGB10S} ${mountpoint}/rk3326-odroidgo2-linux-v11.dtb.rgb10s
+  sudo cp $KERNEL_SRC/arch/arm64/boot/dts/rockchip/${KERNEL_DTB_RGB10S} ${mountpoint}/rk3326-odroidgo2-linux-v11.dtb.rgb10s
 fi
 
 # G350, Mini M: "Loading..." on the console while the initramfs mounts the root (scripts/bootlogo).

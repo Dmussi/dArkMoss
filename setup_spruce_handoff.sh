@@ -155,6 +155,7 @@ case "$UNIT" in
   353m)      HW_DEVICE_NAME="Anbernic RG353M" ;;
   a10mini)   HW_DEVICE_NAME="A10 Mini" ;;
   g350)      HW_DEVICE_NAME="G350" ;;
+  v10)       HW_DEVICE_NAME="Powkiddy V10" ;;
   xumini)    HW_DEVICE_NAME="XU Mini M" ;;
   *)         HW_DEVICE_NAME="" ;;
 esac
@@ -171,6 +172,7 @@ case "$UNIT" in
   353m)      SPRUCE_PLATFORM_NAME="RG353M" ;;
   a10mini)   SPRUCE_PLATFORM_NAME="A10Mini" ;;
   g350)      SPRUCE_PLATFORM_NAME="G350" ;;
+  v10)       SPRUCE_PLATFORM_NAME="V10" ;;
   xumini)    SPRUCE_PLATFORM_NAME="XUMiniM" ;;
   *)         SPRUCE_PLATFORM_NAME="" ;;
 esac
@@ -182,4 +184,17 @@ fi
 # one (DARKMOSS_VERSION), the build date otherwise.
 if ! grep -q '^OS_VERSION=' Arkbuild/etc/os-release 2>/dev/null; then
   echo "OS_VERSION=\"${DARKMOSS_VERSION:-$BUILD_DATE}\"" | sudo tee -a Arkbuild/etc/os-release >/dev/null
+fi
+
+# V10 boot trims, each measured in a V10 boot log (systemd-analyze blame):
+#   welcome-message  3.1 s in sysinit, everything waits for it (G350 drops it too)
+#   networking, NetworkManager-wait-online, wifi_importer, wpa_supplicant:
+#     ifupdown has no interfaces file and the V10 has no Wi-Fi chip; NM still
+#     runs for spruce's nmcli and dbus-activates wpa_supplicant if ever needed
+#   keyboard-setup   0.6 s, no keyboard on a handheld
+# fstab: the 4.4 kernel has no compression levels, so "compress=zlib:1" made
+# systemd-remount-fs fail on every boot; plain "zlib" is the same algorithm.
+if [ "$UNIT" == "v10" ]; then
+  sudo chroot Arkbuild/ bash -c "systemctl disable welcome-message networking wifi_importer NetworkManager-wait-online wpa_supplicant 2>/dev/null; systemctl mask keyboard-setup.service" || true
+  sudo sed -i 's/compress=zlib:1/compress=zlib/' Arkbuild/etc/fstab
 fi

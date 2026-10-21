@@ -58,6 +58,9 @@ if [ "$UNIT" == "xumini" ]; then
 elif [ "$UNIT" == "g350" ]; then
   # oakMOSS-style logo from logos/make-logo.py 640 480 (bootlogo.service also shows it).
   sudo cp logos/g350/logo.bmp ${mountpoint}/logo.bmp
+elif [ "$UNIT" == "v10" ]; then
+  # 320x480 portrait panel booted with fbcon=rotate:3: logos/make-logo.py 320 480 --rotate-ccw.
+  sudo cp logos/v10/logo.bmp ${mountpoint}/logo.bmp
 else
   sudo cp logos/unrotated/dArkMoss.bmp ${mountpoint}/logo.bmp
 fi

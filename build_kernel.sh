@@ -107,6 +107,17 @@ sudo cp $KERNEL_SRC/arch/arm64/boot/Image ${mountpoint}/
 sudo cp $KERNEL_SRC/arch/arm64/boot/dts/rockchip/${KERNEL_DTB} ${mountpoint}/
 # The V4's dtb, which boot.ini loads when U-Boot picked the V4 panel.
 [ "$UNIT" == "a10mini" ] && sudo cp $KERNEL_SRC/arch/arm64/boot/dts/rockchip/${CHIPSET}-a10mini-v4-linux.dtb ${mountpoint}/
+if [ "$UNIT" == "v10" ]; then
+  # The v11 dts names an ESP8089 SDIO Wi-Fi chip the V10 does not have. With
+  # this kernel's rkwifi (WL_ROCKCHIP) that node registers a Wi-Fi power switch,
+  # and turning Wi-Fi on froze the V10. Its Wi-Fi is a USB dongle, so the node
+  # goes (tested on a V10: no freeze, dongle connects).
+  if ! command -v fdtput &> /dev/null; then
+    sudo apt -y update
+    sudo apt -y install device-tree-compiler
+  fi
+  sudo fdtput -t s ${mountpoint}/${KERNEL_DTB} /wireless-wlan status disabled
+fi
 if [[ " $UBOOT_OPTIN " == *" uboot-dtb "* ]]; then
   # image_setup.sh's opt-in: U-Boot loads only uboot.dtb, so that is the one U-Boot
   # dtb on BOOT; every unit's dts stays in the U-Boot tree.

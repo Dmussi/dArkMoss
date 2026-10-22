@@ -42,7 +42,9 @@ jobs:
             mkdir -p .toolchain-cache
             git clone --depth=1 https://github.com/christianhaitian/${TCNAME}.git "$LOCAL"
           fi
-          echo "$LOCAL/bin" >> "$GITHUB_PATH"
+          # make.sh only looks in /opt/toolchains.
+          sudo mkdir -p /opt/toolchains
+          sudo ln -sfn "$LOCAL" "/opt/toolchains/$TCNAME"
 
       - name: Build U-Boot
         env:

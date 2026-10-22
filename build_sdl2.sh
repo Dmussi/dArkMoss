@@ -61,6 +61,12 @@ elif [ "$UNIT" == "xumini" ]; then
   # rotate180 pass, unconditional upstream); install our ROT_90 variant
   # instead, saved mid-build as "...rotated" before that pass ran.
   sudo chroot ${CHROOT_DIR}/ bash -c "cp -f /home/ark/${CHIPSET}_core_builds/sdl2-${BITNESS}/libSDL2-2.0.so.0.$extension.rotated /usr/lib/${ARCH}/libSDL2-2.0.so.0.$extension"
+elif [ "$UNIT" == "a10mini" ]; then
+  # Both builds for a10mini-panel.sh, which installs the V4's rotate-180 one on a V4.
+  sudo chroot ${CHROOT_DIR}/ bash -c "cp -f /home/ark/${CHIPSET}_core_builds/sdl2-${BITNESS}/libSDL2-2.0.so.0.$extension /usr/lib/${ARCH}/."
+  sudo mkdir -p Arkbuild/usr/local/share/a10mini
+  sudo cp -f ${CHROOT_DIR}/home/ark/${CHIPSET}_core_builds/sdl2-${BITNESS}/libSDL2-2.0.so.0.$extension Arkbuild/usr/local/share/a10mini/sdl${BITNESS}-a10
+  sudo cp -f ${CHROOT_DIR}/home/ark/${CHIPSET}_core_builds/sdl2-${BITNESS}/libSDL2-2.0.so.0.$extension.a10miniv4 Arkbuild/usr/local/share/a10mini/sdl${BITNESS}-v4
 elif [[ "$UNIT" != *"rgb10"* ]] && [ "$UNIT" != "v10" ] && [ "$UNIT" != "rk2020" ] && [ "$CHIPSET" == "rk3326" ]; then
   sudo chroot ${CHROOT_DIR}/ bash -c "cp -f /home/ark/${CHIPSET}_core_builds/sdl2-${BITNESS}/libSDL2-2.0.so.0.$extension /usr/lib/${ARCH}/."
 fi

@@ -6,12 +6,25 @@ if [ "$UNIT" == "rg351mp" ]; then
 else
   INITRD_LOADERADDRESS="0x04000000"
 fi
-# G350: pass U-Boot's panel-ID result to Linux (/proc/cmdline), where a per-panel
+# G350, A10 Mini: pass U-Boot's panel-ID result to Linux (/proc/cmdline), where a per-panel
 # kernel dtb can key on it later.
-if [ "$UNIT" == "g350" ]; then
+if [ "$UNIT" == "g350" ] || [ "$UNIT" == "a10mini" ]; then
   PANEL_ARGS=" panel_id=\${panel_id} panel_node=\${panel_node}"
 else
   PANEL_ARGS=""
+fi
+# A10 Mini: one image for the A10 Mini and the V4. U-Boot switches to panel@1 when the
+# panel's ID is the V4's (patches/a10mini/uboot); boot that panel's dtb, turned 180 degrees.
+BOOT_ROTATION="${SCREEN_ROTATION}"
+BOOT_DTB="${KERNEL_DTB}"
+PANEL_LINE=""
+if [ "$UNIT" == "a10mini" ]; then
+  BOOT_ROTATION='${fb_rotate}'
+  BOOT_DTB='${dtb_name}'
+  PANEL_LINE="setenv dtb_name \"${KERNEL_DTB}\"
+setenv fb_rotate \"${SCREEN_ROTATION}\"
+if test \"\${panel_node}\" = \"panel@1\"; then setenv dtb_name \"${CHIPSET}-a10mini-v4-linux.dtb\"; setenv fb_rotate \"2\"; fi
+"
 fi
 # G350, Mini M: with /boot/darkmoss-debug, kernel and systemd text on the panel instead of the logos
 # (every bootlogo piece skips itself on darkmoss.debug).
@@ -35,7 +48,7 @@ fi
 cat <<EOF | sudo tee ${mountpoint}/boot.ini
 odroidgoa-uboot-config
 
-setenv bootargs "root=/dev/mmcblk0p2 rootwait rw fsck.repair=yes net.ifnames=0 fbcon=rotate:${SCREEN_ROTATION} console=/dev/ttyFIQ0 quiet splash consoleblank=0 vt.global_cursor_default=0${PANEL_ARGS}${ROOTFS_ARGS}"
+${PANEL_LINE}setenv bootargs "root=/dev/mmcblk0p2 rootwait rw fsck.repair=yes net.ifnames=0 fbcon=rotate:${BOOT_ROTATION} console=/dev/ttyFIQ0 quiet splash consoleblank=0 vt.global_cursor_default=0${PANEL_ARGS}${ROOTFS_ARGS}"
 ${DEBUG_LINE}
 
 # Booting
@@ -46,7 +59,7 @@ setenv dtb_loadaddr "0x01f00000"
 load mmc 1:1 \${loadaddr} Image
 ${INITRD_LOAD_LINE}
 
-load mmc 1:1 \${dtb_loadaddr} ${KERNEL_DTB}
+load mmc 1:1 \${dtb_loadaddr} ${BOOT_DTB}
 
 ${BOOTI_LINE}
 EOF
@@ -251,6 +264,13 @@ sudo chroot Arkbuild/ bash -c "(crontab -l 2>/dev/null; echo \"@reboot /usr/loca
 # Fix LEDs on A10 Mini to default to the nice dim blue light while powered on
 if [[ "$UNIT" == "a10mini" ]]; then
   sudo chroot Arkbuild/ bash -c "(crontab -l 2>/dev/null; echo \"@reboot /usr/local/bin/fix_power_led &\") | crontab -"
+  # One image for the A10 Mini and the V4 (720x540, upside down): per-panel SDL and boot logo.
+  sudo mkdir -p Arkbuild/usr/local/share/a10mini
+  sudo cp logos/unrotated/dArkMoss.bmp Arkbuild/usr/local/share/a10mini/logo-a10.bmp
+  sudo cp logos/a10mini/logo-v4.bmp Arkbuild/usr/local/share/a10mini/logo-v4.bmp
+  sudo install -D -m 0755 scripts/a10mini/a10mini-panel.sh Arkbuild/usr/local/sbin/a10mini-panel.sh
+  sudo cp scripts/a10mini/a10mini-panel.service Arkbuild/etc/systemd/system/
+  sudo chroot Arkbuild/ bash -c "systemctl enable a10mini-panel.service"
 fi
 
 # Disable requirement for sudo for setting niceness

@@ -36,11 +36,17 @@ if [ "$UNIT" == "g350" ]; then
   patch -p1 < ../patches/g350/uboot/0002-g350-uboot-two-panels.patch
   verify_action
 fi
+if [ "$UNIT" == "a10mini" ]; then
+  # One image for the A10 Mini and the V4: both panels, told apart by the panel-id fix below.
+  patch -p1 < ../patches/a10mini/uboot/0001-a10mini-uboot-two-panels.patch
+  verify_action
+fi
 # Opt-in fixes from patches/rk3326/uboot: a unit lists only what it was tested with.
 # uboot-dtb: U-Boot loads uboot.dtb, whatever hwrev reads; build_kernel.sh ships it.
 # panel-id: read the panel's ID and switch to the sibling panel node it names.
 case "$UNIT" in
   g350)   UBOOT_OPTIN="uboot-dtb panel-id" ;;
+  a10mini) UBOOT_OPTIN="panel-id" ;;
   xumini) UBOOT_OPTIN="uboot-dtb" ;;
   *)      UBOOT_OPTIN="" ;;
 esac

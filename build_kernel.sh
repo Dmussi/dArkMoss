@@ -93,6 +93,8 @@ KERNEL_VERSION=$(basename $(ls Arkbuild/lib/modules))
 sudo cp $KERNEL_SRC/.config Arkbuild/boot/config-${KERNEL_VERSION}
 sudo cp $KERNEL_SRC/arch/arm64/boot/Image ${mountpoint}/
 sudo cp $KERNEL_SRC/arch/arm64/boot/dts/rockchip/${KERNEL_DTB} ${mountpoint}/
+# The V4's dtb, which boot.ini loads when U-Boot picked the V4 panel.
+[ "$UNIT" == "a10mini" ] && sudo cp $KERNEL_SRC/arch/arm64/boot/dts/rockchip/${CHIPSET}-a10mini-v4-linux.dtb ${mountpoint}/
 if [[ " $UBOOT_OPTIN " == *" uboot-dtb "* ]]; then
   # image_setup.sh's opt-in: U-Boot loads only uboot.dtb, so that is the one U-Boot
   # dtb on BOOT; every unit's dts stays in the U-Boot tree.

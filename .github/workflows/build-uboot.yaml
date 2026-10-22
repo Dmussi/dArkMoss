@@ -11,10 +11,15 @@ on:
         description: "RK3326 unit (Makefile target)"
         required: true
         default: "a10mini"
+  push:
+    branches: [a10miniv4]
+    paths: [patches/a10mini/**, .github/workflows/build-uboot.yaml]
 
 jobs:
   uboot:
     runs-on: ubuntu-24.04
+    env:
+      UNIT: ${{ inputs.unit || 'a10mini' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -41,7 +46,6 @@ jobs:
 
       - name: Build U-Boot
         env:
-          UNIT: ${{ inputs.unit }}
           CHIPSET: rk3326
         run: |
           export CROSS_COMPILE=aarch64-linux-gnu-
@@ -57,7 +61,7 @@ jobs:
           mv ../out out-uboot
 
       - name: Build the unit's extra kernel dtbs
-        if: ${{ inputs.unit == 'a10mini' }}
+        if: ${{ env.UNIT == 'a10mini' }}
         run: |
           git clone --depth=1 --filter=blob:none --sparse -b rg351 https://github.com/christianhaitian/linux.git k
           git -C k sparse-checkout set include/dt-bindings arch/arm64/boot/dts/rockchip arch/arm64/boot/dts/include
@@ -71,5 +75,5 @@ jobs:
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: uboot-${{ inputs.unit }}
+          name: uboot-${{ env.UNIT }}
           path: u-boot-rk3326/out-uboot/

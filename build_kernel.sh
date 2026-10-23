@@ -70,6 +70,14 @@ if [ "$UNIT" == "g350" ]; then
     verify_action
   done
 fi
+# A10 Mini V4: the stock V4 image's 59.9 Hz panel timing and speaker mute delay.
+if [ "$UNIT" == "a10mini" ]; then
+  for fix in ../patches/a10mini/kernel/*.patch; do
+    git apply -R --check "$fix" 2>/dev/null && continue
+    git apply "$fix"
+    verify_action
+  done
+fi
 make ARCH=arm64 ${DEF_CONFIG}
 CFLAGS=-Wno-deprecated-declarations make -j$(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- modules_prepare
 CFLAGS=-Wno-deprecated-declarations make -j$(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image dtbs modules

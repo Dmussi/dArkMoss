@@ -67,6 +67,7 @@ jobs:
         run: |
           git clone --depth=1 --filter=blob:none --sparse -b rg351 https://github.com/christianhaitian/linux.git k
           git -C k sparse-checkout set include/dt-bindings include/uapi/linux arch/arm64/boot/dts/rockchip arch/arm64/boot/dts/include
+          git -C k apply "$PWD"/patches/a10mini/kernel/*.patch
           cd k
           for dts in rk3326-a10mini-v4-linux; do
             cpp -nostdinc -undef -D__DTS__ -x assembler-with-cpp -I include -I arch/arm64/boot/dts \

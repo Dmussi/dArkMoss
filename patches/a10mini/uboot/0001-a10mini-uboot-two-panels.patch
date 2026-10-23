@@ -99,7 +99,7 @@ a10miniv4-uboot.dts) as a disabled sibling, for the panel-ID check (rk3326/uboot
 +				hback-porch = <32>;
 +				vfront-porch = <10>;
 +				vsync-len = <20>;
-+				vback-porch = <20>;
++				vback-porch = <38>;
 +				hsync-active = <0>;
 +				vsync-active = <0>;
 +				de-active = <0>;

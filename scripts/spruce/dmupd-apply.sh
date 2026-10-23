@@ -144,6 +144,15 @@ fi
 # The layer carries the build's enable symlinks; firstboot has already run here.
 systemctl disable firstboot.service >/dev/null 2>&1
 ldconfig
+# ldconfig points each soname link at a file carrying that soname, which is the
+# diverted Mesa copy (libEGL.so.1.1.0.distrib), not libMali.so, so the GL links
+# go back to Mali the way cleanup_filesystem.sh made them.
+for dir in /usr/lib/aarch64-linux-gnu /usr/lib/arm-linux-gnueabihf; do
+    [ -e "$dir/libMali.so" ] || continue
+    for lib in libEGL.so libEGL.so.1 libEGL.so.1.1.0 libGLES_CM.so libGLES_CM.so.1 libGLESv1_CM.so libGLESv1_CM.so.1 libGLESv1_CM.so.1.1.0 libGLESv2.so libGLESv2.so.2 libGLESv2.so.2.0.0 libGLESv2.so.2.1.0 libGLESv3.so libGLESv3.so.3 libgbm.so libgbm.so.1 libgbm.so.1.0.0 libmali.so libmali.so.1 libMaliOpenCL.so; do
+        ln -sfn libMali.so "$dir/$lib"
+    done
+done
 KVER="$(field kernel)"
 [ -n "$KVER" ] && [ -d "/usr/lib/modules/$KVER" ] && depmod -a "$KVER" 2>/dev/null
 systemctl daemon-reload 2>/dev/null

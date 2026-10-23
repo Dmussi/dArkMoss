@@ -273,6 +273,15 @@ if [[ "$UNIT" == "a10mini" ]]; then
   sudo chroot Arkbuild/ bash -c "systemctl enable a10mini-panel.service"
 fi
 
+# Wired adbd. Not on the A10 Mini: its WiFi sits on the only OTG controller.
+sudo install -D -m 0755 scripts/adbd/adbd-gadget.sh Arkbuild/usr/local/sbin/adbd-gadget.sh
+sudo cp scripts/adbd/adbd.service Arkbuild/etc/systemd/system/
+if [[ "$UNIT" != "a10mini" ]]; then
+  sudo chroot Arkbuild/ bash -c "systemctl enable adbd"
+else
+  sudo chroot Arkbuild/ bash -c "systemctl disable adbd"
+fi
+
 # Disable requirement for sudo for setting niceness
 echo "ark              -       nice            -20" | sudo tee -a Arkbuild/etc/security/limits.conf
 

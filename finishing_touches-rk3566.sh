@@ -276,6 +276,11 @@ fi
 sudo cp scripts/audiostate.service Arkbuild/etc/systemd/system/audiostate.service
 sudo chroot Arkbuild/ bash -c "systemctl enable audiostate"
 
+# Wired adbd
+sudo install -D -m 0755 scripts/adbd/adbd-gadget.sh Arkbuild/usr/local/sbin/adbd-gadget.sh
+sudo cp scripts/adbd/adbd.service Arkbuild/etc/systemd/system/
+sudo chroot Arkbuild/ bash -c "systemctl enable adbd"
+
 # Copy various other backend tools
 sudo cp -R scripts/.asoundbackup/ Arkbuild/usr/local/bin/
 sudo cp scripts/round_end.wav Arkbuild/usr/local/bin/

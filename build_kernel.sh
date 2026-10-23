@@ -79,6 +79,9 @@ if [ "$UNIT" == "a10mini" ]; then
   done
 fi
 make ARCH=arm64 ${DEF_CONFIG}
+# FunctionFS for adbd's USB gadget.
+scripts/config --enable USB_CONFIGFS_F_FS
+make ARCH=arm64 olddefconfig
 CFLAGS=-Wno-deprecated-declarations make -j$(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- modules_prepare
 CFLAGS=-Wno-deprecated-declarations make -j$(nproc) ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- Image dtbs modules
 verify_action

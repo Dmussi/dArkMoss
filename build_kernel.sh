@@ -70,7 +70,7 @@ if [ "$UNIT" == "g350" ]; then
     verify_action
   done
 fi
-# A10 Mini V4: the stock V4 image's 59.9 Hz panel timing and speaker mute delay.
+# A10 Mini V4: the stock V4 image's 59.9 Hz panel timing.
 if [ "$UNIT" == "a10mini" ]; then
   for fix in ../patches/a10mini/kernel/*.patch; do
     git apply -R --check "$fix" 2>/dev/null && continue

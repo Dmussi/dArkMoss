@@ -26,9 +26,9 @@ setenv fb_rotate \"${SCREEN_ROTATION}\"
 if test \"\${panel_node}\" = \"panel@1\"; then setenv dtb_name \"${CHIPSET}-a10mini-v4-linux.dtb\"; setenv fb_rotate \"2\"; fi
 "
 fi
-# G350, Mini M: with /boot/darkmoss-debug, kernel and systemd text on the panel instead of the logos
+# G350, Mini M, V10: with /boot/darkmoss-debug, kernel and systemd text on the panel instead of the logos
 # (every bootlogo piece skips itself on darkmoss.debug).
-if [ "$UNIT" == "g350" ] || [ "$UNIT" == "xumini" ]; then
+if [ "$UNIT" == "g350" ] || [ "$UNIT" == "xumini" ] || [ "$UNIT" == "v10" ]; then
   DEBUG_LINE='if test -e mmc 1:1 /darkmoss-debug; then setenv bootargs "${bootargs} console=tty0 loglevel=7 systemd.show_status=1 darkmoss.debug"; fi'
 else
   DEBUG_LINE=""
@@ -78,7 +78,7 @@ else
   sudo cp logos/unrotated/dArkMoss.bmp ${mountpoint}/logo.bmp
 fi
 # bootlogo.service's redraw: that logo plus oakMOSS's status line (make-logo.py --status).
-if [ "$UNIT" == "g350" ] || [ "$UNIT" == "xumini" ]; then
+if [ "$UNIT" == "g350" ] || [ "$UNIT" == "xumini" ] || [ "$UNIT" == "v10" ]; then
   sudo cp logos/${UNIT}/logo-boot.bmp logos/${UNIT}/logo-firstboot.bmp ${mountpoint}/
 fi
 
@@ -460,9 +460,11 @@ sudo cp scripts/boot_text.sh Arkbuild/usr/local/bin/
 sudo chmod 777 Arkbuild/usr/local/bin/boot_text.sh
 sudo cp scripts/welcome-message.service Arkbuild/etc/systemd/system/welcome-message.service
 sudo chroot Arkbuild/ bash -c "systemctl enable welcome-message"
-# G350, Mini M: the logo stays up instead of the welcome text, which would clear it. bootlogo.service
+# G350, Mini M, V10: the logo stays up instead of the welcome text, which would clear it. bootlogo.service
 # redraws it once the console blanks U-Boot's (upstream's image-viewer logo.service is not built).
-if [ "$UNIT" == "g350" ] || [ "$UNIT" == "xumini" ]; then
+# The V10 boots without an initramfs, so it has no initramfs-loading hook: bootlogo-loading.service
+# prints "Loading..." from systemd's start.
+if [ "$UNIT" == "g350" ] || [ "$UNIT" == "xumini" ] || [ "$UNIT" == "v10" ]; then
   sudo chroot Arkbuild/ bash -c "systemctl disable welcome-message"
   sudo cp scripts/bootlogo/bootlogo.py scripts/bootlogo/bootlogo-loading.sh Arkbuild/usr/local/sbin/
   sudo chmod 0755 Arkbuild/usr/local/sbin/bootlogo.py Arkbuild/usr/local/sbin/bootlogo-loading.sh

@@ -17,8 +17,9 @@ if [ -f "build.log" ]; then
   done
 fi
 (
-# Wire the rppocket unit into the shared scripts (idempotent)
-./scripts/add-rppocket-unit.sh || exit 1
+# Wire the rppocket unit into the shared scripts (idempotent). Run through bash:
+# the workflow only chmods ./*.sh and ./scripts/ci/*.sh.
+bash ./scripts/add-rppocket-unit.sh || exit 1
 
 # Set chipset in environment variable
 export CHIPSET=rk3326

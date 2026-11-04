@@ -55,6 +55,57 @@ fi
 
 # --- add further collectors here -------------------------------------------
 
+# Hardware state for display and power bring-up. Answers "which rail or gate is
+# off" from a single boot, without a shell on the device. debugfs is mounted by
+# systemd; mount it if something has not.
+mountpoint -q /sys/kernel/debug || mount -t debugfs none /sys/kernel/debug 2>/dev/null
+{
+    echo "--- device tree model"
+    tr -d '\0' < /proc/device-tree/model 2>/dev/null; echo
+    echo
+    echo "--- cmdline"
+    cat /proc/cmdline 2>/dev/null
+    echo
+    echo "--- gpio (look for lcd-vspn-en, lcd-vcc5v-en, amp-en, wifi-3v3-en: all should be out hi)"
+    cat /sys/kernel/debug/gpio 2>/dev/null
+    echo
+    echo "--- regulators"
+    cat /sys/kernel/debug/regulator/regulator_summary 2>/dev/null
+    echo
+    echo "--- backlight"
+    for b in /sys/class/backlight/*; do
+        [ -d "$b" ] || continue
+        echo "$b"
+        for f in brightness actual_brightness max_brightness bl_power; do
+            [ -r "$b/$f" ] && echo "  $f: $(cat "$b/$f" 2>/dev/null)"
+        done
+    done
+    echo
+    echo "--- pwm"
+    cat /sys/kernel/debug/pwm 2>/dev/null
+    echo
+    echo "--- pin claims for the panel pins (pinctrl)"
+    cat /sys/kernel/debug/pinctrl/pinctrl-rockchip-pinctrl/pinmux-pins 2>/dev/null | grep -E "pin (2|3|8|9|10|11|20|21|22|23|24|25|112|115|117|120|128|129) " 
+    echo
+    echo "--- drm"
+    for c in /sys/class/drm/card*-*; do
+        [ -d "$c" ] || continue
+        echo "$c status=$(cat "$c/status" 2>/dev/null) enabled=$(cat "$c/enabled" 2>/dev/null) modes=$(tr '\n' ' ' < "$c/modes" 2>/dev/null)"
+    done
+    echo
+    echo "--- drm state"
+    cat /sys/kernel/debug/dri/0/state 2>/dev/null | head -n 80
+    echo
+    echo "--- framebuffer"
+    cat /sys/class/graphics/fb0/virtual_size 2>/dev/null
+    cat /sys/class/graphics/fb0/bits_per_pixel 2>/dev/null
+    echo
+    echo "--- fbcon / vtconsole"
+    for v in /sys/class/vtconsole/vtcon*; do
+        [ -d "$v" ] && echo "$v: $(cat "$v/name" 2>/dev/null) bind=$(cat "$v/bind" 2>/dev/null)"
+    done
+} > "$OUT/hw-state.txt" 2>&1
+
 # Keep the newest $KEEP runs. /boot is 104MB and a dirty one is a brick, so
 # this is not optional housekeeping.
 ls -1d "$LOGDIR"/*/ 2>/dev/null | sort | head -n "-$KEEP" | while read -r old; do

@@ -47,10 +47,12 @@ edit("build_update.sh", case_line(
 
 # --- build_kernel.sh: add our device tree, like xumini's block ---------------
 KB = '''if [ "$UNIT" == "rppocket" ]; then
-  # christianhaitian/linux's rg351 branch has no RetroPixel Pocket board: copy
-  # its device tree in (RG351MP tree + board edits, see patches/rppocket/README.md).
+  # christianhaitian/linux's rg351 branch has no RetroPixel Pocket board: build
+  # its device tree from the board dts plus the power-gate dtsi (see
+  # patches/rppocket/README.md) and add it to the Makefile.
   KDTS=$KERNEL_SRC/arch/arm64/boot/dts/rockchip
-  cp "$PWD"/patches/rppocket/kernel/rk3326-rppocket-linux.dts $KDTS/
+  cat "$PWD"/patches/rppocket/kernel/rk3326-rppocket-linux.dts \\
+      "$PWD"/patches/rppocket/kernel/rk3326-rppocket-power.dtsi > $KDTS/rk3326-rppocket-linux.dts
   grep -q rk3326-rppocket-linux.dtb $KDTS/Makefile || \\
     sed -i 's/^\\(dtb-\\$(CONFIG_ARCH_ROCKCHIP) += rk3326-a10mini-v4-linux.dtb\\)$/\\1\\ndtb-$(CONFIG_ARCH_ROCKCHIP) += rk3326-rppocket-linux.dtb/' $KDTS/Makefile
   grep -q rk3326-rppocket-linux.dtb $KDTS/Makefile

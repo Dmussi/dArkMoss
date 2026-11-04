@@ -1,0 +1,71 @@
+
+/*
+ * RetroPixel Pocket board power gates. Appended to rk3326-rppocket-linux.dts by
+ * the build (see scripts/add-rppocket-unit.sh).
+ *
+ * The vendor kernel's panel driver switches these pins with raw gpio_set_value(),
+ * so the GPIO_ACTIVE_LOW flags in the vendor DTB are misleading: physical HIGH
+ * is "enabled". The rg351 kernel's panel driver does not know these pins, so they
+ * are held high here. Evidence: scristobal/retropixel-pocket-rocknix,
+ * docs/decisions/008-power-rails.txt (a working display on this hardware).
+ */
+
+&gpio0 {
+	/* LCD VSPN (panel bias) */
+	lcd-vspn-en-hog {
+		gpio-hog;
+		gpios = <RK_PA2 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "lcd-vspn-en";
+	};
+
+	/* Wi-Fi 3.3 V enable (the stock firmware sets it from userspace) */
+	wifi-3v3-en-hog {
+		gpio-hog;
+		gpios = <RK_PA1 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "wifi-3v3-en";
+	};
+};
+
+&gpio3 {
+	/* LCD 5 V rail */
+	lcd-vcc5v-en-hog {
+		gpio-hog;
+		gpios = <RK_PC3 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "lcd-vcc5v-en";
+	};
+
+	/* NS4150 speaker amplifier */
+	amp-en-hog {
+		gpio-hog;
+		gpios = <RK_PC5 GPIO_ACTIVE_HIGH>;
+		output-high;
+		line-name = "ns4150-amp-en";
+	};
+};
+
+/* The backlight LED rail and the panel I/O rail stay on, as in the stock kernel. */
+&backlight2v8 {
+	regulator-always-on;
+	regulator-boot-on;
+};
+
+&vcc_lcd {
+	regulator-always-on;
+	regulator-boot-on;
+};
+
+/*
+ * The pins above are claimed by the gpio-hogs, and the kernel refuses a second
+ * (pinmux) claim on the same pin, which makes the panel's own pinctrl state fail
+ * and the panel driver never probe. Keep only the panel reset pin and the vendor's
+ * pull-ups on the other pins in the panel's pinctrl group.
+ */
+&lcd_rst_gpio {
+	rockchip,pins = <3 RK_PC0 RK_FUNC_GPIO &pcfg_pull_none>,
+			<2 RK_PB1 RK_FUNC_GPIO &pcfg_pull_up>,
+			<0 RK_PA0 RK_FUNC_GPIO &pcfg_pull_up>,
+			<0 RK_PB4 RK_FUNC_GPIO &pcfg_pull_up>;
+};
